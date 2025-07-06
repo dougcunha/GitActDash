@@ -60,13 +60,13 @@ export default function RepositoryColumn({
   const statusTotals = getStatusTotals(workflows);
 
   return (
-    <div className="flex-shrink-0 w-80 bg-gray-50 rounded-lg shadow-sm">
+    <div className="flex-shrink-0 w-80 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm">
       {/* Column Header with Repository Info and Status Totals */}
-      <div className="bg-white rounded-t-lg p-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-t-lg p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="font-semibold text-lg text-gray-900">{repo.name}</h3>
-            <p className="text-sm text-gray-500">{repo.full_name}</p>
+            <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">{repo.name}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{repo.full_name}</p>
           </div>
           <div className="flex items-center gap-2">
             {repo.owner?.type === 'Organization' && (
@@ -93,8 +93,8 @@ export default function RepositoryColumn({
       {/* Workflows List */}
       <div className="p-4 max-h-96 overflow-y-auto">
         {filteredWorkflows.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <svg className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <p className="text-sm">

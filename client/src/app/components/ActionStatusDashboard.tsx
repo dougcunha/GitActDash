@@ -223,7 +223,7 @@ export default function ActionStatusDashboard({ token, selectedRepos, repos }: P
   if (loading) {
     return (
       <div className="mt-12 flex justify-center items-center py-8">
-        <div className="text-gray-600">Loading action statuses...</div>
+        <div className="text-gray-600 dark:text-gray-400">Loading action statuses...</div>
       </div>
     );
   }
@@ -231,30 +231,32 @@ export default function ActionStatusDashboard({ token, selectedRepos, repos }: P
   return (
     <div className="mt-12">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold">Action Status Dashboard</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Action Status Dashboard</h2>
         
-        <RefreshControls
-          isRefreshing={isRefreshing}
-          autoRefresh={autoRefresh}
-          refreshInterval={refreshInterval}
-          countdown={countdown}
-          onManualRefresh={handleManualRefresh}
-          onToggleAutoRefresh={toggleAutoRefresh}
-          onIntervalChange={setRefreshInterval}
-        />
+        <div className="flex items-center gap-4">
+          <RefreshControls
+            isRefreshing={isRefreshing}
+            autoRefresh={autoRefresh}
+            refreshInterval={refreshInterval}
+            countdown={countdown}
+            onManualRefresh={handleManualRefresh}
+            onToggleAutoRefresh={toggleAutoRefresh}
+            onIntervalChange={setRefreshInterval}
+          />
+        </div>
       </div>
 
       {/* Last Updated Indicator */}
       {lastUpdated && (
         <div className="mb-4 text-center">
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             Last updated: {lastUpdated.toLocaleTimeString()}
           </span>
         </div>
       )}
       
       {selectedRepos.length === 0 ? (
-        <div className="text-center py-12 text-gray-600">
+        <div className="text-center py-12 text-gray-600 dark:text-gray-400">
           <p>Select repositories to view their action status</p>
         </div>
       ) : (

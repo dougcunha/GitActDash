@@ -48,15 +48,15 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
 
   return (
     <div
-      className="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:shadow-lg transition-shadow cursor-pointer"
       onClick={() => window.open(workflow.workflow_url, '_blank')}
     >
       <div className="flex items-center space-x-2 mb-2">
         <span className={`w-3 h-3 rounded-full flex-shrink-0 ${getStatusColor()}`} />
-        <h4 className="font-medium text-sm text-gray-900 truncate">{workflow.workflow_name}</h4>
+        <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{workflow.workflow_name}</h4>
       </div>
       {workflow.latest_run ? (
-        <div className="text-xs text-gray-600">
+        <div className="text-xs text-gray-600 dark:text-gray-400">
           <p className="capitalize mb-1 flex items-center gap-1">
             <span className="font-medium">Status:</span>
             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor()}`}>
@@ -68,12 +68,12 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
           <p className="mb-1">
             <span className="font-medium">Executed:</span> {new Date(workflow.latest_run.created_at).toLocaleDateString()}
           </p>
-          <p className="text-blue-600 font-medium">Click to view on GitHub →</p>
+          <p className="text-blue-600 dark:text-blue-400 font-medium">Click to view on GitHub →</p>
         </div>
       ) : (
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 dark:text-gray-400">
           <p className="italic">No executions found</p>
-          <p className="text-blue-600 font-medium mt-1">Click to view on GitHub →</p>
+          <p className="text-blue-600 dark:text-blue-400 font-medium mt-1">Click to view on GitHub →</p>
         </div>
       )}
     </div>

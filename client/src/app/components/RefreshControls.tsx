@@ -27,8 +27,8 @@ export default function RefreshControls({
         disabled={isRefreshing}
         className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-200 ${
           isRefreshing
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600'
         }`}
       >
         <svg 
@@ -48,22 +48,22 @@ export default function RefreshControls({
       </button>
 
       {/* Auto Refresh Toggle */}
-      <div className="flex items-center gap-3 bg-white border border-gray-300 rounded-lg px-4 py-2">
+      <div className="flex items-center gap-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2">
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             checked={autoRefresh}
             onChange={onToggleAutoRefresh}
-            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+            className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-600"
           />
-          <span className="text-sm font-medium text-gray-700">Auto Refresh</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Auto Refresh</span>
         </label>
         
         {/* Interval Selector */}
         <select
           value={refreshInterval}
           onChange={(e) => onIntervalChange(Number(e.target.value))}
-          className="text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+          className="text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-600 dark:focus:border-blue-600"
           disabled={autoRefresh}
         >
           <option value={10}>10s</option>
@@ -75,7 +75,7 @@ export default function RefreshControls({
 
         {/* Countdown Display */}
         {autoRefresh && countdown > 0 && (
-          <div className="flex items-center gap-1 text-sm text-gray-600">
+          <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
