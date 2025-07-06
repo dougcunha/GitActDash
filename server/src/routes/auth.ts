@@ -1,0 +1,39 @@
+import { Router } from 'express';
+import axios from 'axios';
+
+const router = Router();
+
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+
+router.get('/login', (req, res) => {
+  const redirect_uri = 'http://localhost:3001/api/auth/callback';
+  res.redirect(`https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${redirect_uri}`);
+});
+
+router.get('/callback', async (req, res) => {
+  const { code } = req.query;
+
+  try {
+    const response = await axios.post('https://github.com/login/oauth/access_token', {
+      client_id: GITHUB_CLIENT_ID,
+      client_secret: GITHUB_CLIENT_SECRET,
+      code,
+    }, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    const { access_token } = response.data;
+
+    // For now, we'll just redirect to the client with the token.
+    // In a real app, you'd create a session for the user.
+    res.redirect(`http://localhost:3003/dashboard?token=${access_token}`);
+  } catch (error) {
+    console.error('Error getting access token', error);
+    res.status(500).send('Error getting access token');
+  }
+});
+
+export default router;
