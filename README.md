@@ -1,156 +1,156 @@
 # 🚀 GitActDash - GitHub Actions Dashboard
 
-Um dashboard moderno e intuitivo para monitorar o status das GitHub Actions dos seus repositórios em tempo real.
+A modern and intuitive dashboard to monitor your GitHub repositories' Actions status in real-time.
 
 ![GitHub Actions Dashboard](https://img.shields.io/badge/Status-Active-green)
 ![Node.js](https://img.shields.io/badge/Node.js-v18+-green)
 ![Next.js](https://img.shields.io/badge/Next.js-15.3.5-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8+-blue)
 
-## ✨ Funcionalidades
+## ✨ Features
 
-- 🔐 **Autenticação GitHub OAuth**: Login seguro com sua conta GitHub
-- 📊 **Dashboard Intuitivo**: Interface com abas para melhor organização
-- 🔍 **Seleção de Repositórios**: Escolha quais repositórios monitorar
-- 📈 **Status em Tempo Real**: Visualize o status das GitHub Actions
-- 🎨 **Interface Moderna**: Design responsivo com Tailwind CSS
-- 🔄 **Auto-atualização**: Dados atualizados automaticamente
+- 🔐 **GitHub OAuth Authentication**: Secure login with your GitHub account
+- 📊 **Intuitive Dashboard**: Tab-based interface for better organization
+- 🔍 **Repository Selection**: Choose which repositories to monitor
+- 📈 **Real-time Status**: View GitHub Actions status updates
+- 🎨 **Modern Interface**: Responsive design with Tailwind CSS
+- 🔄 **Auto-refresh**: Automatically updated data
 
-## 🏗️ Arquitetura
+## 🏗️ Architecture
 
 ### Frontend (Client)
-- **Next.js 15** com App Router
-- **TypeScript** para type safety
-- **Tailwind CSS** para estilização
-- **React Hooks** para gerenciamento de estado
+- **Next.js 15** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **React Hooks** for state management
 
 ### Backend (Server)
 - **Express.js** API server
-- **GitHub OAuth** para autenticação
-- **GitHub API** para dados dos repositórios
-- **CORS** habilitado para comunicação frontend-backend
+- **GitHub OAuth** for authentication
+- **GitHub API** for repository data
+- **CORS** enabled for frontend-backend communication
 
-## 🚀 Como Executar
+## 🚀 Getting Started
 
-### Pré-requisitos
+### Prerequisites
 
-- Node.js 18+ instalado
-- Conta no GitHub
-- GitHub OAuth App configurado
+- Node.js 18+ installed
+- GitHub account
+- GitHub OAuth App configured
 
-### 1. Clone o repositório
+### 1. Clone the repository
 
-\`\`\`bash
-git clone https://github.com/SEU_USUARIO/gitactdash.git
+```bash
+git clone https://github.com/YOUR_USERNAME/gitactdash.git
 cd gitactdash
-\`\`\`
+```
 
-### 2. Instale as dependências
+### 2. Install dependencies
 
-\`\`\`bash
-# Instalar dependências do projeto principal
+```bash
+# Install main project dependencies
 npm install
 
-# Instalar dependências do cliente
+# Install client dependencies
 cd client && npm install && cd ..
 
-# Instalar dependências do servidor
+# Install server dependencies
 cd server && npm install && cd ..
-\`\`\`
+```
 
-### 3. Configurar GitHub OAuth App
+### 3. Configure GitHub OAuth App
 
-1. Acesse [GitHub Developer Settings](https://github.com/settings/developers)
-2. Clique em "New OAuth App"
-3. Preencha os campos:
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
+2. Click "New OAuth App"
+3. Fill in the fields:
    - **Application name**: GitActDash
-   - **Homepage URL**: \`http://localhost:3000\`
-   - **Authorization callback URL**: \`http://localhost:3001/api/auth/callback\`
-4. Clique em "Register application"
-5. Copie o **Client ID** e **Client Secret**
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:3001/api/auth/callback`
+4. Click "Register application"
+5. Copy the **Client ID** and **Client Secret**
 
-### 4. Configurar variáveis de ambiente
+### 4. Set up environment variables
 
-Copie o arquivo de exemplo e configure suas credenciais:
+Copy the example file and configure your credentials:
 
-\`\`\`bash
+```bash
 cp server/.env.example server/.env
-\`\`\`
+```
 
-Edite o arquivo \`server/.env\`:
+Edit the `server/.env` file:
 
-\`\`\`env
+```env
 PORT=3001
-GITHUB_CLIENT_ID=seu_client_id_aqui
-GITHUB_CLIENT_SECRET=seu_client_secret_aqui
-\`\`\`
+GITHUB_CLIENT_ID=your_client_id_here
+GITHUB_CLIENT_SECRET=your_client_secret_here
+```
 
-### 5. Executar o projeto
+### 5. Run the project
 
-\`\`\`bash
-# Executar ambos os servidores (frontend e backend)
+```bash
+# Run both servers (frontend and backend)
 npm run dev
-\`\`\`
+```
 
-O projeto estará disponível em:
-- **Frontend**: http://localhost:3000 (ou próxima porta disponível)
+The project will be available at:
+- **Frontend**: http://localhost:3000 (or next available port)
 - **Backend**: http://localhost:3001
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
-\`\`\`
+```
 gitactdash/
-├── client/                 # Frontend Next.js
+├── client/                 # Next.js Frontend
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── components/     # Componentes React
-│   │   │   ├── dashboard/      # Página do dashboard
-│   │   │   ├── layout.tsx      # Layout principal
-│   │   │   └── page.tsx        # Página inicial
+│   │   │   ├── components/     # React Components
+│   │   │   ├── dashboard/      # Dashboard Page
+│   │   │   ├── layout.tsx      # Main Layout
+│   │   │   └── page.tsx        # Home Page
 │   │   └── styles/
-│   ├── public/             # Arquivos estáticos
-│   ├── tailwind.config.js  # Configuração Tailwind
+│   ├── public/             # Static Files
+│   ├── tailwind.config.js  # Tailwind Configuration
 │   └── package.json
-├── server/                 # Backend Express
+├── server/                 # Express Backend
 │   ├── src/
-│   │   ├── routes/         # Rotas da API
-│   │   ├── types/          # Tipos TypeScript
-│   │   ├── config.ts       # Configuração
-│   │   └── index.ts        # Servidor principal
-│   ├── .env.example        # Exemplo de variáveis
+│   │   ├── routes/         # API Routes
+│   │   ├── types/          # TypeScript Types
+│   │   ├── config.ts       # Configuration
+│   │   └── index.ts        # Main Server
+│   ├── .env.example        # Environment Variables Example
 │   └── package.json
 ├── .gitignore
-├── package.json           # Scripts principais
+├── package.json           # Main Scripts
 └── README.md
-\`\`\`
+```
 
-## 🔧 Scripts Disponíveis
+## 🔧 Available Scripts
 
-\`\`\`bash
-# Executar em modo desenvolvimento
+```bash
+# Run in development mode
 npm run dev
 
-# Executar apenas o frontend
+# Run frontend only
 npm run dev --prefix client
 
-# Executar apenas o backend
+# Run backend only
 npm run dev --prefix server
 
-# Build do frontend
+# Build frontend
 npm run build --prefix client
 
-# Iniciar frontend em produção
+# Start frontend in production
 npm run start --prefix client
-\`\`\`
+```
 
-## 🎯 Como Usar
+## 🎯 How to Use
 
-1. **Login**: Clique em "Login with GitHub" na página inicial
-2. **Autorização**: Autorize o app no GitHub
-3. **Seleção**: Na aba "Select Repositories", escolha os repositórios para monitorar
-4. **Monitoramento**: Acesse a aba "Action Status" para ver o status das GitHub Actions
+1. **Login**: Click "Login with GitHub" on the home page
+2. **Authorization**: Authorize the app on GitHub
+3. **Selection**: In the "Select Repositories" tab, choose repositories to monitor
+4. **Monitoring**: Access the "Action Status" tab to view GitHub Actions status
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Technologies Used
 
 ### Frontend
 - Next.js 15.3.5
@@ -161,35 +161,35 @@ npm run start --prefix client
 
 ### Backend
 - Express.js 5+
-- Axios para requests HTTP
-- CORS para comunicação cross-origin
-- dotenv para variáveis de ambiente
+- Axios for HTTP requests
+- CORS for cross-origin communication
+- dotenv for environment variables
 
 ### DevTools
-- ESLint para linting
-- TypeScript para type checking
-- ts-node-dev para desenvolvimento
-- Concurrently para executar múltiplos scripts
+- ESLint for linting
+- TypeScript for type checking
+- ts-node-dev for development
+- Concurrently for running multiple scripts
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (\`git checkout -b feature/AmazingFeature\`)
-3. Commit suas mudanças (\`git commit -m 'Add some AmazingFeature'\`)
-4. Push para a branch (\`git push origin feature/AmazingFeature\`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## 🙏 Agradecimentos
+## 🙏 Acknowledgments
 
-- GitHub API pela funcionalidade
-- Next.js team pelo framework
-- Tailwind CSS pela estilização
-- Vercel pela hospedagem
+- GitHub API for functionality
+- Next.js team for the framework
+- Tailwind CSS for styling
+- Vercel for hosting
 
 ---
 
-**Desenvolvido com ❤️ para a comunidade de desenvolvedores**
+**Built with ❤️ for the developer community**
