@@ -18,7 +18,7 @@ router.get('/repos', requireAuth, async (req: Request, res: Response) => {
   try {
     console.log('Fetching repositories for user...');
     
-    // Buscar repositórios pessoais
+    // Fetch personal repositories
     const userReposResponse = await axios.get('https://api.github.com/user/repos', {
       headers: {
         // @ts-ignore
@@ -33,7 +33,7 @@ router.get('/repos', requireAuth, async (req: Request, res: Response) => {
 
     console.log(`Found ${userReposResponse.data.length} user repositories`);
 
-    // Buscar organizações do usuário
+    // Fetch user organizations
     const orgsResponse = await axios.get('https://api.github.com/user/orgs', {
       headers: {
         // @ts-ignore
@@ -43,7 +43,7 @@ router.get('/repos', requireAuth, async (req: Request, res: Response) => {
 
     console.log(`Found ${orgsResponse.data.length} organizations`);
 
-    // Buscar repositórios de cada organização
+    // Fetch repositories from each organization
     const orgRepos: any[] = [];
     for (const org of orgsResponse.data) {
       try {
@@ -67,13 +67,13 @@ router.get('/repos', requireAuth, async (req: Request, res: Response) => {
       }
     }
 
-    // Combinar todos os repositórios e remover duplicatas
+    // Combine all repositories and remove duplicates
     const allRepos = [...userReposResponse.data, ...orgRepos];
     const uniqueRepos = allRepos.filter((repo, index, self) => 
       index === self.findIndex(r => r.id === repo.id)
     );
 
-    // Ordenar por última atualização
+    // Sort by last update
     uniqueRepos.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
     console.log(`Returning ${uniqueRepos.length} total unique repositories`);
@@ -101,6 +101,68 @@ router.get('/repos/:owner/:repo/runs', requireAuth, async (req: Request, res: Re
     console.error(`Error fetching workflow runs for ${owner}/${repo}:`, error.response?.data || error.message);
     res.status(500).json({ 
       error: 'Error fetching workflow runs',
+      message: error.response?.data?.message || error.message 
+    });
+  }
+});
+
+// New route to get workflows with their latest runs
+router.get('/repos/:owner/:repo/workflows', requireAuth, async (req: Request, res: Response) => {
+  const { owner, repo } = req.params;
+  try {
+    // First, get all workflows for this repository
+    const workflowsResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/actions/workflows`, {
+      headers: {
+        // @ts-ignore
+        Authorization: `Bearer ${req.token}`,
+      },
+    });
+
+    const workflows = workflowsResponse.data.workflows || [];
+    const workflowsWithLatestRun: any[] = [];
+
+    // For each workflow, get its latest run
+    for (const workflow of workflows) {
+      try {
+        const runsResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow.id}/runs`, {
+          headers: {
+            // @ts-ignore
+            Authorization: `Bearer ${req.token}`,
+          },
+          params: {
+            per_page: 1 // Only get the latest run
+          }
+        });
+
+        const latestRun = runsResponse.data.workflow_runs?.[0];
+        
+        workflowsWithLatestRun.push({
+          workflow_id: workflow.id,
+          workflow_name: workflow.name,
+          workflow_path: workflow.path,
+          workflow_state: workflow.state,
+          workflow_url: workflow.html_url,
+          latest_run: latestRun || null
+        });
+      } catch (runError: any) {
+        console.warn(`Could not fetch runs for workflow ${workflow.id}:`, runError.response?.status);
+        // Include workflow even if we can't get its runs
+        workflowsWithLatestRun.push({
+          workflow_id: workflow.id,
+          workflow_name: workflow.name,
+          workflow_path: workflow.path,
+          workflow_state: workflow.state,
+          workflow_url: workflow.html_url,
+          latest_run: null
+        });
+      }
+    }
+
+    res.json({ workflows: workflowsWithLatestRun });
+  } catch (error: any) {
+    console.error(`Error fetching workflows for ${owner}/${repo}:`, error.response?.data || error.message);
+    res.status(500).json({ 
+      error: 'Error fetching workflows',
       message: error.response?.data?.message || error.message 
     });
   }
