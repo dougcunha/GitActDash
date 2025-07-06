@@ -6,6 +6,12 @@ interface Repo {
   id: number;
   name: string;
   full_name: string;
+  private?: boolean;
+  owner?: {
+    login: string;
+    type: 'User' | 'Organization';
+  };
+  updated_at?: string;
 }
 
 interface WorkflowRun {

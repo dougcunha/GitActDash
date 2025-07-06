@@ -8,7 +8,8 @@ const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
 router.get('/login', (req, res) => {
   const redirect_uri = 'http://localhost:3001/api/auth/callback';
-  res.redirect(`https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${redirect_uri}`);
+  const scope = 'repo read:org read:user'; // Adicionar scopes necessários
+  res.redirect(`https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${redirect_uri}&scope=${scope}`);
 });
 
 router.get('/callback', async (req, res) => {
