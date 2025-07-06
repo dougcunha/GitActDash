@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import { config } from '@/config/env';
 
 export default function Home() {
   const router = useRouter();
 
   const handleLogin = () => {
-    router.push("http://localhost:3001/api/auth/login");
+    router.push(`${config.serverUrl}/api/auth/login`);
   };
 
   return (

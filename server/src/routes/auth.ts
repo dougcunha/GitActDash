@@ -5,9 +5,11 @@ const router = Router();
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+const SERVER_URL = process.env.SERVER_URL || `http://localhost:${process.env.PORT || '3001'}`;
+const CLIENT_URL = process.env.CLIENT_URL || `http://localhost:${process.env.CLIENT_PORT || '3000'}`;
 
 router.get('/login', (req, res) => {
-  const redirect_uri = 'http://localhost:3001/api/auth/callback';
+  const redirect_uri = `${SERVER_URL}/api/auth/callback`;
   const scope = 'repo read:org read:user'; // Adicionar scopes necessários
   res.redirect(`https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${redirect_uri}&scope=${scope}`);
 });
@@ -30,7 +32,7 @@ router.get('/callback', async (req, res) => {
 
     // For now, we'll just redirect to the client with the token.
     // In a real app, you'd create a session for the user.
-    res.redirect(`http://localhost:3003/dashboard?token=${access_token}`);
+    res.redirect(`${CLIENT_URL}/dashboard?token=${access_token}`);
   } catch (error) {
     console.error('Error getting access token', error);
     res.status(500).send('Error getting access token');

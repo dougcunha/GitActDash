@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import ActionStatusDashboard from '../components/ActionStatusDashboard';
 import ClientOnly from '../components/ClientOnly';
 import ThemeToggle from '../components/ThemeToggle';
+import { config } from '@/config/env';
 
 interface Repo {
   id: number;
@@ -94,7 +95,7 @@ function DashboardContent() {
 
   useEffect(() => {
     if (token) {
-      fetch('http://localhost:3001/api/repos', {
+      fetch(`${config.serverUrl}/api/repos`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(async res => {
@@ -150,7 +151,7 @@ function DashboardContent() {
               return;
             }
 
-            const response = await fetch(`http://localhost:3001/api/repos/${repo.full_name}/workflows`, {
+            const response = await fetch(`${config.serverUrl}/api/repos/${repo.full_name}/workflows`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             

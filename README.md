@@ -71,6 +71,8 @@ cd server && npm install && cd ..
 
 ### 4. Set up environment variables
 
+#### Backend Configuration
+
 Copy the example file and configure your credentials:
 
 ```bash
@@ -80,9 +82,45 @@ cp server/.env.example server/.env
 Edit the `server/.env` file:
 
 ```env
+# Port for the server
 PORT=3001
+
+# Port for the client (frontend)
+CLIENT_PORT=3000
+
+# Base URLs for the application (useful for production/Docker)
+SERVER_URL=http://localhost:3001
+CLIENT_URL=http://localhost:3000
+
+# GitHub OAuth App credentials
 GITHUB_CLIENT_ID=your_client_id_here
 GITHUB_CLIENT_SECRET=your_client_secret_here
+```
+
+#### Frontend Configuration (Optional)
+
+Create a `client/.env.local` file to override default URLs:
+
+```env
+# Server URL (backend)
+NEXT_PUBLIC_SERVER_URL=http://localhost:3001
+
+# Client URL (frontend)  
+NEXT_PUBLIC_CLIENT_URL=http://localhost:3000
+```
+
+> **Note**: The frontend will automatically use the default ports if these variables are not set.
+
+#### Production/Docker Example
+
+For production or containerized environments:
+
+```env
+# server/.env (Production)
+PORT=8080
+CLIENT_PORT=80
+SERVER_URL=https://api.yourdomain.com
+CLIENT_URL=https://yourdomain.com
 ```
 
 ### 5. Run the project
