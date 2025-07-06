@@ -33,38 +33,44 @@ router.get('/repos', requireAuth, async (req: Request, res: Response) => {
 
     console.log(`Found ${userReposResponse.data.length} user repositories`);
 
-    // Fetch user organizations
-    const orgsResponse = await axios.get('https://api.github.com/user/orgs', {
-      headers: {
-        // @ts-ignore
-        Authorization: `Bearer ${req.token}`,
-      },
-    });
+    let orgRepos: any[] = [];
 
-    console.log(`Found ${orgsResponse.data.length} organizations`);
+    // Try to fetch user organizations (but don't fail if no permissions)
+    try {
+      const orgsResponse = await axios.get('https://api.github.com/user/orgs', {
+        headers: {
+          // @ts-ignore
+          Authorization: `Bearer ${req.token}`,
+        },
+      });
 
-    // Fetch repositories from each organization
-    const orgRepos: any[] = [];
-    for (const org of orgsResponse.data) {
-      try {
-        console.log(`Fetching repos for org: ${org.login}`);
-        const orgReposResponse = await axios.get(`https://api.github.com/orgs/${org.login}/repos`, {
-          headers: {
-            // @ts-ignore
-            Authorization: `Bearer ${req.token}`,
-          },
-          params: {
-            type: 'all',
-            sort: 'updated',
-            per_page: 100
-          }
-        });
-        console.log(`Found ${orgReposResponse.data.length} repos for org ${org.login}`);
-        orgRepos.push(...orgReposResponse.data);
-      } catch (orgError: any) {
-        console.warn(`Could not fetch repos for org ${org.login}:`, orgError.response?.status);
-        // Continue with other orgs even if one fails
+      console.log(`Found ${orgsResponse.data.length} organizations`);
+
+      // Fetch repositories from each organization
+      for (const org of orgsResponse.data) {
+        try {
+          console.log(`Fetching repos for org: ${org.login}`);
+          const orgReposResponse = await axios.get(`https://api.github.com/orgs/${org.login}/repos`, {
+            headers: {
+              // @ts-ignore
+              Authorization: `Bearer ${req.token}`,
+            },
+            params: {
+              type: 'all',
+              sort: 'updated',
+              per_page: 100
+            }
+          });
+          console.log(`Found ${orgReposResponse.data.length} repos for org ${org.login}`);
+          orgRepos.push(...orgReposResponse.data);
+        } catch (orgError: any) {
+          console.warn(`Could not fetch repos for org ${org.login}:`, orgError.response?.status);
+          // Continue with other orgs even if one fails
+        }
       }
+    } catch (orgsError: any) {
+      console.warn('Could not fetch organizations (missing read:org scope?):', orgsError.response?.status);
+      // Continue with just personal repos
     }
 
     // Combine all repositories and remove duplicates

@@ -18,6 +18,25 @@ interface Repo {
   updated_at: string;
 }
 
+interface WorkflowRun {
+  id: number;
+  name: string;
+  status: string;
+  conclusion: string | null;
+  html_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface WorkflowWithLatestRun {
+  workflow_id: number;
+  workflow_name: string;
+  workflow_path: string;
+  workflow_state: string;
+  workflow_url: string;
+  latest_run: WorkflowRun | null;
+}
+
 type TabType = 'repos' | 'actions';
 
 function DashboardContent() {
@@ -30,6 +49,11 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<TabType>('repos');
   const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Workflow states moved from ActionStatusDashboard
+  const [workflows, setWorkflows] = useState<Record<number, WorkflowWithLatestRun[]>>({});
+  const [workflowsLoading, setWorkflowsLoading] = useState(false);
+  const [lastSelectedRepos, setLastSelectedRepos] = useState<number[]>([]);
 
   // Handle client-side mounting
   useEffect(() => {
@@ -108,6 +132,61 @@ function DashboardContent() {
       localStorage.setItem('selected_repos', JSON.stringify(newSelectedRepos));
     }
   };
+
+  // Function to load workflows for selected repositories
+  const loadWorkflows = async (repoIds: number[]) => {
+    if (!token || repoIds.length === 0) return;
+    
+    setWorkflowsLoading(true);
+    const newWorkflows: Record<number, WorkflowWithLatestRun[]> = {};
+    
+    try {
+      await Promise.all(
+        repoIds.map(async (repoId) => {
+          try {
+            const repo = repos.find(r => r.id === repoId);
+            if (!repo) {
+              newWorkflows[repoId] = [];
+              return;
+            }
+
+            const response = await fetch(`http://localhost:3001/api/repos/${repo.full_name}/workflows`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              newWorkflows[repoId] = Array.isArray(data.workflows) ? data.workflows : [];
+            } else {
+              newWorkflows[repoId] = [];
+            }
+          } catch (error) {
+            console.error(`Error fetching workflows for repo ${repoId}:`, error);
+            newWorkflows[repoId] = [];
+          }
+        })
+      );
+      
+      setWorkflows(newWorkflows);
+      setLastSelectedRepos([...repoIds]);
+    } catch (error) {
+      console.error('Error loading workflows:', error);
+    } finally {
+      setWorkflowsLoading(false);
+    }
+  };
+
+  // Check if selectedRepos changed and load workflows if needed
+  useEffect(() => {
+    const reposChanged = JSON.stringify(selectedRepos.sort()) !== JSON.stringify(lastSelectedRepos.sort());
+    
+    if (reposChanged && selectedRepos.length > 0 && token) {
+      loadWorkflows(selectedRepos);
+    } else if (selectedRepos.length === 0) {
+      setWorkflows({});
+      setLastSelectedRepos([]);
+    }
+  }, [selectedRepos, token]);
 
   const filteredRepos = repos.filter(repo => {
     // Filter by type (personal/organization)
@@ -362,7 +441,14 @@ function DashboardContent() {
       {activeTab === 'actions' && (
         <div>
           {selectedRepos.length > 0 && token ? (
-            <ActionStatusDashboard token={token} selectedRepos={selectedRepos} repos={repos} />
+            <ActionStatusDashboard 
+              token={token} 
+              selectedRepos={selectedRepos} 
+              repos={repos}
+              workflows={workflows}
+              workflowsLoading={workflowsLoading}
+              onRefreshWorkflows={() => loadWorkflows(selectedRepos)}
+            />
           ) : (
             <div className="text-center py-12">
               <div className="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">

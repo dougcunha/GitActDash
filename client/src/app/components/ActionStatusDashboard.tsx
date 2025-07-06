@@ -39,11 +39,19 @@ interface Props {
   token: string;
   selectedRepos: number[];
   repos: Repo[];
+  workflows: Record<number, WorkflowWithLatestRun[]>;
+  workflowsLoading: boolean;
+  onRefreshWorkflows: () => Promise<void>;
 }
 
-export default function ActionStatusDashboard({ token, selectedRepos, repos }: Props) {
-  const [workflows, setWorkflows] = useState<Record<number, WorkflowWithLatestRun[]>>({});
-  const [loading, setLoading] = useState(true);
+export default function ActionStatusDashboard({ 
+  token, 
+  selectedRepos, 
+  repos, 
+  workflows, 
+  workflowsLoading, 
+  onRefreshWorkflows 
+}: Props) {
   const [activeFilters, setActiveFilters] = useState<Record<number, string | null>>({});
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(30); // seconds
@@ -55,31 +63,10 @@ export default function ActionStatusDashboard({ token, selectedRepos, repos }: P
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Function to fetch workflows data
-  const fetchWorkflows = async (showLoading = true) => {
-    if (showLoading) setLoading(true);
+  // Function to refresh workflows data
+  const refreshWorkflows = async (showLoading = true) => {
     setIsRefreshing(true);
-    
-    const workflowsData: Record<number, WorkflowWithLatestRun[]> = {};
-    for (const repoId of selectedRepos) {
-      const repo = repos.find((r) => r.id === repoId);
-      if (repo) {
-        try {
-          const response = await fetch(`http://localhost:3001/api/repos/${repo.full_name}/workflows`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          workflowsData[repoId] = data.workflows || [];
-        } catch (error) {
-          console.error(`Error fetching workflows for ${repo.full_name}:`, error);
-          workflowsData[repoId] = [];
-        }
-      }
-    }
-    setWorkflows(workflowsData);
-    setLoading(false);
+    await onRefreshWorkflows();
     setIsRefreshing(false);
     setLastUpdated(new Date());
   };
@@ -94,7 +81,7 @@ export default function ActionStatusDashboard({ token, selectedRepos, repos }: P
     countdownIntervalRef.current = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
-          fetchWorkflows(false);
+          refreshWorkflows(false);
           return refreshInterval;
         }
         return prev - 1;
@@ -129,24 +116,18 @@ export default function ActionStatusDashboard({ token, selectedRepos, repos }: P
 
   // Function to manual refresh
   const handleManualRefresh = () => {
-    fetchWorkflows(false);
+    refreshWorkflows(false);
     if (autoRefresh) {
       setCountdown(refreshInterval);
     }
   };
 
   useEffect(() => {
-    if (token && selectedRepos.length > 0) {
-      fetchWorkflows();
-    } else {
-      setLoading(false);
-    }
-    
     // Cleanup function
     return () => {
       stopAutoRefresh();
     };
-  }, [token, selectedRepos, repos]);
+  }, []);
 
   // Effect to handle auto refresh changes
   useEffect(() => {
@@ -220,7 +201,7 @@ export default function ActionStatusDashboard({ token, selectedRepos, repos }: P
     }));
   };
 
-  if (loading) {
+  if (workflowsLoading && Object.keys(workflows).length === 0) {
     return (
       <div className="mt-12 flex justify-center items-center py-8">
         <div className="text-gray-600 dark:text-gray-400">Loading action statuses...</div>
