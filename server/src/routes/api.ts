@@ -1,18 +1,8 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 import axios from 'axios';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
-
-const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).send('Unauthorized');
-    return;
-  }
-  // @ts-ignore
-  req.token = authHeader.split(' ')[1];
-  next();
-};
 
 router.get('/repos', requireAuth, async (req: Request, res: Response) => {
   try {
@@ -21,8 +11,7 @@ router.get('/repos', requireAuth, async (req: Request, res: Response) => {
     // Fetch personal repositories
     const userReposResponse = await axios.get('https://api.github.com/user/repos', {
       headers: {
-        // @ts-ignore
-        Authorization: `Bearer ${req.token}`,
+        Authorization: `Bearer ${req.githubToken}`,
       },
       params: {
         type: 'all',
@@ -39,8 +28,7 @@ router.get('/repos', requireAuth, async (req: Request, res: Response) => {
     try {
       const orgsResponse = await axios.get('https://api.github.com/user/orgs', {
         headers: {
-          // @ts-ignore
-          Authorization: `Bearer ${req.token}`,
+          Authorization: `Bearer ${req.githubToken}`,
         },
       });
 
@@ -52,8 +40,7 @@ router.get('/repos', requireAuth, async (req: Request, res: Response) => {
           console.log(`Fetching repos for org: ${org.login}`);
           const orgReposResponse = await axios.get(`https://api.github.com/orgs/${org.login}/repos`, {
             headers: {
-              // @ts-ignore
-              Authorization: `Bearer ${req.token}`,
+              Authorization: `Bearer ${req.githubToken}`,
             },
             params: {
               type: 'all',
@@ -98,8 +85,7 @@ router.get('/repos/:owner/:repo/runs', requireAuth, async (req: Request, res: Re
   try {
     const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/actions/runs`, {
       headers: {
-        // @ts-ignore
-        Authorization: `Bearer ${req.token}`,
+        Authorization: `Bearer ${req.githubToken}`,
       },
     });
     res.json(response.data);
@@ -119,8 +105,7 @@ router.get('/repos/:owner/:repo/workflows', requireAuth, async (req: Request, re
     // First, get all workflows for this repository
     const workflowsResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/actions/workflows`, {
       headers: {
-        // @ts-ignore
-        Authorization: `Bearer ${req.token}`,
+        Authorization: `Bearer ${req.githubToken}`,
       },
     });
 
@@ -132,8 +117,7 @@ router.get('/repos/:owner/:repo/workflows', requireAuth, async (req: Request, re
       try {
         const runsResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow.id}/runs`, {
           headers: {
-            // @ts-ignore
-            Authorization: `Bearer ${req.token}`,
+            Authorization: `Bearer ${req.githubToken}`,
           },
           params: {
             per_page: 1 // Only get the latest run
