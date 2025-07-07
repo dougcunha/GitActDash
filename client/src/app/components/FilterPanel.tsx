@@ -125,7 +125,7 @@ export default function FilterPanel({
           <option value="personal">Personal ({repos.filter(r => r.owner?.type === 'User').length})</option>
           {organizationNames.map((name) => (
             <option key={name} value={name}>
-              {name}
+              {name} ({repos.filter(r => r.owner?.login === name).length})
             </option>
           ))}
         </select>
