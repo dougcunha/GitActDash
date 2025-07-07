@@ -58,6 +58,7 @@ export default function ActionStatusDashboard({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Filtros de tipo e busca (iguais à aba de repositórios)
   const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
@@ -244,6 +245,44 @@ export default function ActionStatusDashboard({
     );
   }
 
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 overflow-auto">
+        <div className="p-4">
+          <button
+            onClick={() => setIsFullscreen(false)}
+            className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full p-2 hover:bg-gray-300 dark:hover:bg-gray-600 z-10"
+            title="Exit Fullscreen"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="sr-only">Exit Fullscreen</span>
+          </button>
+          <div className="flex gap-6 overflow-x-auto pb-4 mt-12">
+            {filteredRepos.map((repo) => {
+              if (!repo) return null;
+              const repoWorkflows = workflows[repo.id] || [];
+              const filteredWorkflows = getFilteredWorkflows(repo.id, repoWorkflows);
+              const activeFilter = activeFilters[repo.id];
+              return (
+                <RepositoryColumn
+                  key={repo.id}
+                  repo={repo}
+                  workflows={repoWorkflows}
+                  filteredWorkflows={filteredWorkflows}
+                  activeFilter={activeFilter}
+                  onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
+                  getStatusTotals={getStatusTotals}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-12">
       {/* Header */}
@@ -321,6 +360,16 @@ export default function ActionStatusDashboard({
             onToggleAutoRefresh={toggleAutoRefresh}
             onIntervalChange={setRefreshInterval}
           />
+          {/* Fullscreen Button */}
+          <button
+            onClick={() => setIsFullscreen(true)}
+            className="p-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+            title="Enter Fullscreen"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 1v-4m0 0h-4m4 0l-5 5" />
+            </svg>
+          </button>
         </div>
       </div>
 
