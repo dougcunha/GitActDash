@@ -81,7 +81,7 @@ export default function RepositoryColumn({
             )}
           </div>
         </div>
-        
+
         <StatusTotals
           totals={statusTotals}
           activeFilter={activeFilter}

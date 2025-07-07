@@ -59,6 +59,10 @@ export default function ActionStatusDashboard({
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
+  // Filtros de tipo e busca (iguais à aba de repositórios)
+  const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Refs for intervals
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -212,6 +216,26 @@ export default function ActionStatusDashboard({
       });
   };
 
+  const selectedReposDetails = selectedRepos
+    .map(repoId => repos.find(r => r.id === repoId))
+    .filter((repo): repo is Repo => repo !== undefined);
+
+  const personalReposCount = selectedReposDetails.filter(r => r.owner?.type === 'User').length;
+  const organizationReposCount = selectedReposDetails.filter(r => r.owner?.type === 'Organization').length;
+
+  // Repositórios filtrados
+  const filteredRepos = getSortedRepos().filter(repo => {
+    const typeFilter =
+      repoFilter === 'all' ||
+      (repoFilter === 'personal' && repo.owner?.type === 'User') ||
+      (repoFilter === 'organization' && repo.owner?.type === 'Organization');
+    const searchFilter = searchTerm === '' ||
+      repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      repo.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (repo.owner?.login && repo.owner.login.toLowerCase().includes(searchTerm.toLowerCase()));
+    return typeFilter && searchFilter;
+  });
+
   if (workflowsLoading && Object.keys(workflows).length === 0) {
     return (
       <div className="mt-12 flex justify-center items-center py-8">
@@ -222,10 +246,43 @@ export default function ActionStatusDashboard({
 
   return (
     <div className="mt-12">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Action Status Dashboard</h2>
-
-        <div className="flex items-center gap-4">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Action Status</h2>
+          {lastUpdated && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-4 mt-4">
+          {/* Search Filter */}
+          <div className="relative flex-1 min-w-[280px]">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Search repositories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 dark:focus:placeholder-gray-300 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-600"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              >
+                <svg className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {/* Sort Controls */}
           <SortControls
             sortOrder={sortOrder}
             onSortOrderChange={setSortOrder}
@@ -233,6 +290,28 @@ export default function ActionStatusDashboard({
             label="Sort repositories:"
             size="md"
           />
+          {/* Type Filter Controls */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setRepoFilter('all')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'all' ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+            >
+              All ({selectedReposDetails.length})
+            </button>
+            <button
+              onClick={() => setRepoFilter('personal')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'personal' ? 'bg-green-600 dark:bg-green-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+            >
+              Personal ({personalReposCount})
+            </button>
+            <button
+              onClick={() => setRepoFilter('organization')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'organization' ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+            >
+              Organizations ({organizationReposCount})
+            </button>
+          </div>
+          {/* Refresh Controls */}
           <RefreshControls
             isRefreshing={isRefreshing}
             autoRefresh={autoRefresh}
@@ -245,28 +324,17 @@ export default function ActionStatusDashboard({
         </div>
       </div>
 
-      {/* Last Updated Indicator */}
-      {lastUpdated && (
-        <div className="mb-4 text-center">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </span>
-        </div>
-      )}
-
       {selectedRepos.length === 0 ? (
         <div className="text-center py-12 text-gray-600 dark:text-gray-400">
           <p>Select repositories to view their action status</p>
         </div>
       ) : (
         <div className="flex gap-6 overflow-x-auto pb-4">
-          {getSortedRepos().map((repo) => {
+          {filteredRepos.map((repo) => {
             if (!repo) return null;
-
             const repoWorkflows = workflows[repo.id] || [];
             const filteredWorkflows = getFilteredWorkflows(repo.id, repoWorkflows);
             const activeFilter = activeFilters[repo.id];
-
             return (
               <RepositoryColumn
                 key={repo.id}
