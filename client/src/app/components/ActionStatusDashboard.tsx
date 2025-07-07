@@ -266,7 +266,7 @@ export default function ActionStatusDashboard({
             </svg>
             <span className="sr-only">Exit Fullscreen</span>
           </button>
-          <div className="flex gap-6 overflow-x-auto pb-4 mt-12">
+          <div className="grid gap-6 pb-4 mt-12 grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
             {filteredRepos.map((repo) => {
               if (!repo) return null;
               const repoWorkflows = workflows[repo.id] || [];
@@ -385,7 +385,7 @@ export default function ActionStatusDashboard({
           <p>Select repositories to view their action status</p>
         </div>
       ) : (
-        <div className="flex gap-6 overflow-x-auto pb-4">
+        <div className="grid gap-6 pb-4 grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
           {filteredRepos.map((repo) => {
             if (!repo) return null;
             const repoWorkflows = workflows[repo.id] || [];

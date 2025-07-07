@@ -60,7 +60,7 @@ export default function RepositoryColumn({
   const statusTotals = getStatusTotals(workflows);
 
   return (
-    <div className="flex-shrink-0 w-80 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm flex flex-col">
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm flex flex-col">
       {/* Column Header with Repository Info and Status Totals */}
       <div className="bg-white dark:bg-gray-800 rounded-t-lg p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
