@@ -43,6 +43,8 @@ interface Props {
   workflows: Record<number, WorkflowWithLatestRun[]>;
   workflowsLoading: boolean;
   onRefreshWorkflows: () => Promise<void>;
+  isFullscreen: boolean;
+  setIsFullscreen: (val: boolean) => void;
 }
 
 export default function ActionStatusDashboard({
@@ -50,12 +52,13 @@ export default function ActionStatusDashboard({
   repos,
   workflows,
   workflowsLoading,
-  onRefreshWorkflows
+  onRefreshWorkflows,
+  isFullscreen,
+  setIsFullscreen
 }: Props) {
   const [activeFilters, setActiveFilters] = useState<Record<number, string | null>>({});
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const refreshWorkflows = useCallback(async () => {
     await onRefreshWorkflows();

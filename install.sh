@@ -1,17 +1,17 @@
 #!/bin/bash
 # Instala as dependências do projeto (root, client e server)
 
-echo "Instalando dependências do root..."
+echo "Installing root dependencies..."
 npm install
 
-echo "Instalando dependências do client..."
+echo "Installing client dependencies..."
 cd client
 npm install
 cd ..
 
-echo "Instalando dependências do server..."
+echo "Installing server dependencies..."
 cd server
 npm install
 cd ..
 
-echo "Instalação concluída!"
+echo "Installation completed!"
