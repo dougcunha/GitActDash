@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import ActionStatusDashboard from '../components/ActionStatusDashboard';
 import ClientOnly from '../components/ClientOnly';
 import ThemeToggle from '../components/ThemeToggle';
+import SortControls from '../components/SortControls';
 import { config } from '@/config/env';
 
 interface Repo {
@@ -50,7 +51,9 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<TabType>('repos');
   const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortBy, setSortBy] = useState<'name' | 'full_name' | 'updated_at'>('name');
+
   // Workflow states moved from ActionStatusDashboard
   const [workflows, setWorkflows] = useState<Record<number, WorkflowWithLatestRun[]>>({});
   const [workflowsLoading, setWorkflowsLoading] = useState(false);
@@ -63,10 +66,10 @@ function DashboardContent() {
 
   useEffect(() => {
     if (!mounted) return;
-    
+
     const accessToken = searchParams.get('token');
     let currentToken = accessToken;
-    
+
     if (typeof window !== 'undefined') {
       currentToken = accessToken || localStorage.getItem('github_token');
 
@@ -75,14 +78,14 @@ function DashboardContent() {
         window.history.replaceState({}, document.title, "/dashboard");
       }
     }
-    
+
     if (!currentToken) {
       if (typeof window !== 'undefined') {
         window.location.href = '/';
       }
       return;
     }
-    
+
     setToken(currentToken);
 
     if (typeof window !== 'undefined') {
@@ -128,7 +131,7 @@ function DashboardContent() {
       ? selectedRepos.filter((id) => id !== repoId)
       : [...selectedRepos, repoId];
     setSelectedRepos(newSelectedRepos);
-    
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('selected_repos', JSON.stringify(newSelectedRepos));
     }
@@ -137,10 +140,10 @@ function DashboardContent() {
   // Function to load workflows for selected repositories
   const loadWorkflows = async (repoIds: number[]) => {
     if (!token || repoIds.length === 0) return;
-    
+
     setWorkflowsLoading(true);
     const newWorkflows: Record<number, WorkflowWithLatestRun[]> = {};
-    
+
     try {
       await Promise.all(
         repoIds.map(async (repoId) => {
@@ -154,7 +157,7 @@ function DashboardContent() {
             const response = await fetch(`${config.serverUrl}/api/repos/${repo.full_name}/workflows`, {
               headers: { Authorization: `Bearer ${token}` },
             });
-            
+
             if (response.ok) {
               const data = await response.json();
               newWorkflows[repoId] = Array.isArray(data.workflows) ? data.workflows : [];
@@ -167,7 +170,7 @@ function DashboardContent() {
           }
         })
       );
-      
+
       setWorkflows(newWorkflows);
       setLastSelectedRepos([...repoIds]);
     } catch (error) {
@@ -180,7 +183,7 @@ function DashboardContent() {
   // Check if selectedRepos changed and load workflows if needed
   useEffect(() => {
     const reposChanged = JSON.stringify(selectedRepos.sort()) !== JSON.stringify(lastSelectedRepos.sort());
-    
+
     if (reposChanged && selectedRepos.length > 0 && token) {
       loadWorkflows(selectedRepos);
     } else if (selectedRepos.length === 0) {
@@ -191,18 +194,36 @@ function DashboardContent() {
 
   const filteredRepos = repos.filter(repo => {
     // Filter by type (personal/organization)
-    const typeFilter = 
-      repoFilter === 'all' || 
+    const typeFilter =
+      repoFilter === 'all' ||
       (repoFilter === 'personal' && repo.owner?.type === 'User') ||
       (repoFilter === 'organization' && repo.owner?.type === 'Organization');
-    
+
     // Filter by search term
-    const searchFilter = searchTerm === '' || 
+    const searchFilter = searchTerm === '' ||
       repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       repo.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (repo.owner?.login && repo.owner.login.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     return typeFilter && searchFilter;
+  }).sort((a, b) => {
+    let compareValue = 0;
+
+    switch (sortBy) {
+      case 'name':
+        compareValue = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        break;
+      case 'full_name':
+        compareValue = a.full_name.toLowerCase().localeCompare(b.full_name.toLowerCase());
+        break;
+      case 'updated_at':
+        compareValue = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+        break;
+      default:
+        compareValue = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    }
+
+    return sortOrder === 'asc' ? compareValue : -compareValue;
   });
 
   if (!mounted) {
@@ -273,7 +294,7 @@ function DashboardContent() {
           <div className="mb-6">
             <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Select Repositories</h2>
             <p className="text-gray-600 dark:text-gray-400">Choose which repositories you want to monitor.</p>
-            
+
             {/* Search and Filter Controls */}
             <div className="mt-4 flex flex-wrap items-center gap-4">
               {/* Search Filter */}
@@ -301,7 +322,18 @@ function DashboardContent() {
                   </button>
                 )}
               </div>
-              
+
+              {/* Sort Controls */}
+              <SortControls
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortByChange={setSortBy}
+                onSortOrderChange={setSortOrder}
+                showSortBySelector={true}
+                label="Sort by:"
+                size="md"
+              />
+
               {/* Type Filter Controls */}
               <div className="flex flex-wrap gap-2">
                 <button
@@ -336,7 +368,7 @@ function DashboardContent() {
                 </button>
               </div>
             </div>
-            
+
             {/* Results Info */}
             {(searchTerm || repoFilter !== 'all') && (
               <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
@@ -351,8 +383,8 @@ function DashboardContent() {
                 <div
                   key={repo.id}
                   className={`border border-gray-200 dark:border-gray-700 rounded-lg p-4 cursor-pointer transition-all duration-200 ease-in-out bg-white dark:bg-gray-800 ${
-                    selectedRepos.includes(repo.id) 
-                      ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg' 
+                    selectedRepos.includes(repo.id)
+                      ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg'
                       : 'hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-md'
                   }`}
                   onClick={() => handleRepoSelection(repo.id)}
@@ -397,8 +429,8 @@ function DashboardContent() {
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No repositories found</h3>
                 <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  {searchTerm 
-                    ? `No repositories match "${searchTerm}". Try adjusting your search.` 
+                  {searchTerm
+                    ? `No repositories match &quot;${searchTerm}&quot;. Try adjusting your search.`
                     : 'No repositories match the selected filter.'
                   }
                 </p>
@@ -424,7 +456,7 @@ function DashboardContent() {
                     {selectedRepos.length} repository{selectedRepos.length !== 1 ? 'ies' : ''} selected
                   </h3>
                   <p className="text-green-600 dark:text-green-300">
-                    Click on "Action Status" tab to view the workflow runs.
+                    Click on &quot;Action Status&quot; tab to view the workflow runs.
                   </p>
                 </div>
                 <button
@@ -442,9 +474,8 @@ function DashboardContent() {
       {activeTab === 'actions' && (
         <div>
           {selectedRepos.length > 0 && token ? (
-            <ActionStatusDashboard 
-              token={token} 
-              selectedRepos={selectedRepos} 
+            <ActionStatusDashboard
+              selectedRepos={selectedRepos}
               repos={repos}
               workflows={workflows}
               workflowsLoading={workflowsLoading}

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import RefreshControls from './RefreshControls';
 import RepositoryColumn from './RepositoryColumn';
+import SortControls from './SortControls';
 
 interface Repo {
   id: number;
@@ -36,7 +37,6 @@ interface WorkflowWithLatestRun {
 }
 
 interface Props {
-  token: string;
   selectedRepos: number[];
   repos: Repo[];
   workflows: Record<number, WorkflowWithLatestRun[]>;
@@ -44,13 +44,12 @@ interface Props {
   onRefreshWorkflows: () => Promise<void>;
 }
 
-export default function ActionStatusDashboard({ 
-  token, 
-  selectedRepos, 
-  repos, 
-  workflows, 
-  workflowsLoading, 
-  onRefreshWorkflows 
+export default function ActionStatusDashboard({
+  selectedRepos,
+  repos,
+  workflows,
+  workflowsLoading,
+  onRefreshWorkflows
 }: Props) {
   const [activeFilters, setActiveFilters] = useState<Record<number, string | null>>({});
   const [autoRefresh, setAutoRefresh] = useState(false);
@@ -58,13 +57,14 @@ export default function ActionStatusDashboard({
   const [countdown, setCountdown] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Refs for intervals
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Function to refresh workflows data
-  const refreshWorkflows = async (showLoading = true) => {
+  const refreshWorkflows = async () => {
     setIsRefreshing(true);
     await onRefreshWorkflows();
     setIsRefreshing(false);
@@ -74,14 +74,14 @@ export default function ActionStatusDashboard({
   // Function to start auto refresh
   const startAutoRefresh = () => {
     if (refreshIntervalRef.current) return;
-    
+
     setCountdown(refreshInterval);
-    
+
     // Start countdown
     countdownIntervalRef.current = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
-          refreshWorkflows(false);
+          refreshWorkflows();
           return refreshInterval;
         }
         return prev - 1;
@@ -106,7 +106,7 @@ export default function ActionStatusDashboard({
   const toggleAutoRefresh = () => {
     const newAutoRefresh = !autoRefresh;
     setAutoRefresh(newAutoRefresh);
-    
+
     if (newAutoRefresh) {
       startAutoRefresh();
     } else {
@@ -116,7 +116,7 @@ export default function ActionStatusDashboard({
 
   // Function to manual refresh
   const handleManualRefresh = () => {
-    refreshWorkflows(false);
+    refreshWorkflows();
     if (autoRefresh) {
       setCountdown(refreshInterval);
     }
@@ -136,7 +136,7 @@ export default function ActionStatusDashboard({
     } else {
       stopAutoRefresh();
     }
-    
+
     return () => {
       stopAutoRefresh();
     };
@@ -201,6 +201,17 @@ export default function ActionStatusDashboard({
     }));
   };
 
+  // Function to get sorted repositories
+  const getSortedRepos = (): Repo[] => {
+    return selectedRepos
+      .map(repoId => repos.find(r => r.id === repoId))
+      .filter((repo): repo is Repo => repo !== undefined)
+      .sort((a, b) => {
+        const compareValue = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        return sortOrder === 'asc' ? compareValue : -compareValue;
+      });
+  };
+
   if (workflowsLoading && Object.keys(workflows).length === 0) {
     return (
       <div className="mt-12 flex justify-center items-center py-8">
@@ -213,8 +224,15 @@ export default function ActionStatusDashboard({
     <div className="mt-12">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Action Status Dashboard</h2>
-        
+
         <div className="flex items-center gap-4">
+          <SortControls
+            sortOrder={sortOrder}
+            onSortOrderChange={setSortOrder}
+            showSortBySelector={false}
+            label="Sort repositories:"
+            size="md"
+          />
           <RefreshControls
             isRefreshing={isRefreshing}
             autoRefresh={autoRefresh}
@@ -235,29 +253,28 @@ export default function ActionStatusDashboard({
           </span>
         </div>
       )}
-      
+
       {selectedRepos.length === 0 ? (
         <div className="text-center py-12 text-gray-600 dark:text-gray-400">
           <p>Select repositories to view their action status</p>
         </div>
       ) : (
         <div className="flex gap-6 overflow-x-auto pb-4">
-          {selectedRepos.map((repoId) => {
-            const repo = repos.find((r) => r.id === repoId);
+          {getSortedRepos().map((repo) => {
             if (!repo) return null;
-            
-            const repoWorkflows = workflows[repoId] || [];
-            const filteredWorkflows = getFilteredWorkflows(repoId, repoWorkflows);
-            const activeFilter = activeFilters[repoId];
-            
+
+            const repoWorkflows = workflows[repo.id] || [];
+            const filteredWorkflows = getFilteredWorkflows(repo.id, repoWorkflows);
+            const activeFilter = activeFilters[repo.id];
+
             return (
               <RepositoryColumn
-                key={repoId}
+                key={repo.id}
                 repo={repo}
                 workflows={repoWorkflows}
                 filteredWorkflows={filteredWorkflows}
                 activeFilter={activeFilter}
-                onFilterToggle={(filterType) => toggleFilter(repoId, filterType)}
+                onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
                 getStatusTotals={getStatusTotals}
               />
             );
