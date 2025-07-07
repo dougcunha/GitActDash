@@ -145,7 +145,14 @@ export default function ActionStatusDashboard({
     return () => {
       stopAutoRefresh();
     };
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, selectedRepos.length]);
+
+  // Effect to trigger refresh when countdown reaches zero
+  useEffect(() => {
+    if (autoRefresh && countdown <= 0) {
+      refreshWorkflows();
+    }
+  }, [countdown]);
 
   // Function to calculate status totals for a repository
   const getStatusTotals = (repoWorkflows: WorkflowWithLatestRun[]) => {
