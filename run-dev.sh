@@ -2,10 +2,10 @@
 # Executa o projeto em modo de desenvolvimento
 
 # Inicia o servidor em background
-echo "Iniciando o servidor..."
+echo "Starting the server..."
 (cd server && npm run dev) &
 
 # Inicia o cliente
-echo "Iniciando o cliente..."
+echo "Starting the client..."
 cd client
 npm run dev
