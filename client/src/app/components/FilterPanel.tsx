@@ -84,6 +84,7 @@ export default function FilterPanel({
         repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         repo.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (repo.owner?.login && repo.owner.login.toLowerCase().includes(searchTerm.toLowerCase()));
+      
       return ownerMatch && searchFilter;
     })
     .sort((a, b) => {

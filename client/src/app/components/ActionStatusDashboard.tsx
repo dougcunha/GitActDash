@@ -58,6 +58,26 @@ export default function ActionStatusDashboard({
 }: Props) {
   const [activeFilters, setActiveFilters] = useState<Record<number, string | null>>({});
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [failedWorkflowFilter, setFailedWorkflowFilter] = useState(false);
+
+  const hasFailedWorkflows = useCallback((repoId: number) => {
+    const repoWorkflows = workflows[repoId];
+    if (!repoWorkflows || repoWorkflows.length === 0) return false;
+    
+    return repoWorkflows.some(workflow => 
+      workflow.latest_run && 
+      (workflow.latest_run.conclusion === 'failure' || 
+       workflow.latest_run.conclusion === 'cancelled' ||
+       workflow.latest_run.conclusion === 'timed_out')
+    );
+  }, [workflows]);
+
+  const getFilteredSelectedRepos = useCallback(() => {
+    if (!failedWorkflowFilter) return selectedRepos;
+    return selectedRepos.filter(repoId => hasFailedWorkflows(repoId));
+  }, [selectedRepos, failedWorkflowFilter, hasFailedWorkflows]);
+
+  const filteredSelectedRepos = getFilteredSelectedRepos();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const refreshWorkflows = useCallback(async () => {
@@ -142,14 +162,14 @@ export default function ActionStatusDashboard({
 
   // Function to get sorted repositories
   const getSortedRepos = useCallback((): Repo[] => {
-    return selectedRepos
+    return filteredSelectedRepos
       .map(repoId => repos.find(r => r.id === repoId))
       .filter((repo): repo is Repo => repo !== undefined)
       .sort((a, b) => {
         const compareValue = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         return sortOrder === 'asc' ? compareValue : -compareValue;
       });
-  }, [selectedRepos, repos, sortOrder]);
+  }, [filteredSelectedRepos, repos, sortOrder]);
 
   const selectedReposDetails = selectedRepos
     .map(repoId => repos.find(r => r.id === repoId))
@@ -157,6 +177,7 @@ export default function ActionStatusDashboard({
 
   const personalReposCount = selectedReposDetails.filter(r => r.owner?.type === 'User').length;
   const organizationReposCount = selectedReposDetails.filter(r => r.owner?.type === 'Organization').length;
+  const failedWorkflowReposCount = selectedRepos.filter(repoId => hasFailedWorkflows(repoId)).length;
 
   // Repositórios filtrados
   const filteredRepos = getSortedRepos().filter(repo => {
@@ -264,7 +285,7 @@ export default function ActionStatusDashboard({
             size="md"
           />
           {/* Type Filter Controls */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
             <button
               onClick={() => setRepoFilter('all')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'all' ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
@@ -283,6 +304,13 @@ export default function ActionStatusDashboard({
             >
               Organizations ({organizationReposCount})
             </button>
+            <button
+              onClick={() => setFailedWorkflowFilter(!failedWorkflowFilter)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${failedWorkflowFilter ? 'bg-red-600 dark:bg-red-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+            >
+              With failures ({failedWorkflowReposCount})
+            </button>
+
           </div>
           {/* Refresh Controls */}
           <RefreshControls
