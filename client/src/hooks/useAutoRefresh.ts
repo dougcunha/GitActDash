@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface Options {
   interval?: number;
@@ -16,27 +16,31 @@ export default function useAutoRefresh(
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     setIsRefreshing(true);
-    await refreshCallback();
-    setIsRefreshing(false);
-  };
+    try {
+      await refreshCallback();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refreshCallback]);
 
-  const start = () => {
+  const start = useCallback(() => {
     if (refreshIntervalRef.current || !enabled) return;
     setCountdown(refreshInterval);
     refreshIntervalRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          refresh();
+          // Schedule refresh for next tick to avoid setState during render
+          setTimeout(() => refresh(), 0);
           return refreshInterval;
         }
         return prev - 1;
       });
     }, 1000);
-  };
+  }, [enabled, refreshInterval, refresh]);
 
-  const stop = () => {
+  const stop = useCallback(() => {
     if (refreshIntervalRef.current) {
       clearInterval(refreshIntervalRef.current);
       refreshIntervalRef.current = null;
@@ -46,23 +50,23 @@ export default function useAutoRefresh(
       countdownIntervalRef.current = null;
     }
     setCountdown(0);
-  };
+  }, []);
 
-  const toggleAutoRefresh = () => {
+  const toggleAutoRefresh = useCallback(() => {
     const newValue = !autoRefresh;
     setAutoRefresh(newValue);
-  };
+  }, [autoRefresh]);
 
-  const manualRefresh = () => {
+  const manualRefresh = useCallback(() => {
     refresh();
     if (autoRefresh) {
       setCountdown(refreshInterval);
     }
-  };
+  }, [refresh, autoRefresh, refreshInterval]);
 
   useEffect(() => {
     return () => stop();
-  }, []);
+  }, [stop]);
 
   useEffect(() => {
     if (autoRefresh && enabled) {
@@ -71,13 +75,7 @@ export default function useAutoRefresh(
       stop();
     }
     return () => stop();
-  }, [autoRefresh, refreshInterval, enabled]);
-
-  useEffect(() => {
-    if (autoRefresh && countdown <= 0 && enabled) {
-      refresh();
-    }
-  }, [countdown]);
+  }, [autoRefresh, refreshInterval, enabled, start, stop]);
 
   return {
     autoRefresh,

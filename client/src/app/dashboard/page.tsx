@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import ActionStatusDashboard from '../components/ActionStatusDashboard';
 import ClientOnly from '../components/ClientOnly';
 import ThemeToggle from '../components/ThemeToggle';
@@ -108,7 +108,7 @@ function DashboardContent() {
   };
 
   // Function to load workflows for selected repositories
-  const loadWorkflows = async (repoIds: number[]) => {
+  const loadWorkflows = useCallback(async (repoIds: number[]) => {
     if (!token || repoIds.length === 0) return;
 
     setWorkflowsLoading(true);
@@ -148,7 +148,7 @@ function DashboardContent() {
     } finally {
       setWorkflowsLoading(false);
     }
-  };
+  }, [token, repos]);
 
   // Check if selectedRepos changed and load workflows if needed
   useEffect(() => {
@@ -160,7 +160,7 @@ function DashboardContent() {
       setWorkflows({});
       setLastSelectedRepos([]);
     }
-  }, [selectedRepos, token]);
+  }, [selectedRepos, token, lastSelectedRepos, loadWorkflows]);
 
   const filteredRepos = repos.filter(repo => {
     // Filter by type (personal/organization)
@@ -196,6 +196,10 @@ function DashboardContent() {
     return sortOrder === 'asc' ? compareValue : -compareValue;
   });
 
+
+  const onRefreshWorkflows = useCallback(async () => {
+    await loadWorkflows(selectedRepos);
+  }, [loadWorkflows, selectedRepos]);
 
   if (loading) {
     return (
@@ -418,7 +422,7 @@ function DashboardContent() {
                 repos={repos}
                 workflows={workflows}
                 workflowsLoading={workflowsLoading}
-                onRefreshWorkflows={() => loadWorkflows(selectedRepos)}
+                onRefreshWorkflows={onRefreshWorkflows}
               />
             ) : (
               <div className="text-center py-12">

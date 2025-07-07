@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import RefreshControls from './RefreshControls';
 import RepositoryColumn from './RepositoryColumn';
 import SortControls from './SortControls';
@@ -57,10 +57,10 @@ export default function ActionStatusDashboard({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  async function refreshWorkflows() {
+  const refreshWorkflows = useCallback(async () => {
     await onRefreshWorkflows();
     setLastUpdated(new Date());
-  }
+  }, [onRefreshWorkflows]);
 
   const {
     autoRefresh,
@@ -77,7 +77,7 @@ export default function ActionStatusDashboard({
   const [searchTerm, setSearchTerm] = useState('');
 
   // Function to calculate status totals for a repository
-  const getStatusTotals = (repoWorkflows: WorkflowWithLatestRun[]) => {
+  const getStatusTotals = useCallback((repoWorkflows: WorkflowWithLatestRun[]) => {
     const totals = {
       success: 0,
       failure: 0,
@@ -103,10 +103,10 @@ export default function ActionStatusDashboard({
     });
 
     return totals;
-  };
+  }, []);
 
   // Function to get workflow status for filtering
-  const getWorkflowStatus = (workflow: WorkflowWithLatestRun): string => {
+  const getWorkflowStatus = useCallback((workflow: WorkflowWithLatestRun): string => {
     if (!workflow.latest_run) {
       return 'no_runs';
     } else if (workflow.latest_run.status === 'completed') {
@@ -116,27 +116,29 @@ export default function ActionStatusDashboard({
     } else {
       return 'no_runs';
     }
-  };
+  }, []);
 
   // Function to filter workflows based on active filter
-  const getFilteredWorkflows = (repoId: number, repoWorkflows: WorkflowWithLatestRun[]) => {
+  const getFilteredWorkflows = useCallback((repoId: number, repoWorkflows: WorkflowWithLatestRun[]) => {
     const activeFilter = activeFilters[repoId];
     if (!activeFilter) {
       return repoWorkflows;
     }
     return repoWorkflows.filter(workflow => getWorkflowStatus(workflow) === activeFilter);
-  };
+  }, [activeFilters, getWorkflowStatus]);
 
   // Function to handle filter toggle
-  const toggleFilter = (repoId: number, filterType: string) => {
-    setActiveFilters(prev => ({
-      ...prev,
-      [repoId]: prev[repoId] === filterType ? null : filterType
-    }));
-  };
+  const toggleFilter = useCallback((repoId: number, filterType: string) => {
+    setActiveFilters((prev) => {
+      if (prev[repoId] === filterType) {
+        return { ...prev, [repoId]: null };
+      }
+      return { ...prev, [repoId]: filterType };
+    });
+  }, []);
 
   // Function to get sorted repositories
-  const getSortedRepos = (): Repo[] => {
+  const getSortedRepos = useCallback((): Repo[] => {
     return selectedRepos
       .map(repoId => repos.find(r => r.id === repoId))
       .filter((repo): repo is Repo => repo !== undefined)
@@ -144,7 +146,7 @@ export default function ActionStatusDashboard({
         const compareValue = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         return sortOrder === 'asc' ? compareValue : -compareValue;
       });
-  };
+  }, [selectedRepos, repos, sortOrder]);
 
   const selectedReposDetails = selectedRepos
     .map(repoId => repos.find(r => r.id === repoId))
