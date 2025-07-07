@@ -46,6 +46,33 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
     }
   };
 
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    const timeFormat = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    if (diffInSeconds < 60) {
+      return `Just now`;
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    } else if (diffInDays === 0) {
+      return `Today at ${timeFormat}`;
+    } else if (diffInDays === 1) {
+      return `Yesterday at ${timeFormat}`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    } else {
+      return `${date.toLocaleDateString()} at ${timeFormat}`;
+    }
+  };
+
   return (
     <div
       className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:shadow-lg transition-shadow cursor-pointer"
@@ -66,7 +93,7 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
             </span>
           </p>
           <p className="mb-1">
-            <span className="font-medium">Executed:</span> {new Date(workflow.latest_run.created_at).toLocaleDateString()} at {new Date(workflow.latest_run.created_at).toLocaleTimeString()}
+            <span className="font-medium">Executed:</span> {formatRelativeTime(workflow.latest_run.created_at)}
           </p>
           <p className="text-blue-600 dark:text-blue-400 font-medium">Click to view on GitHub →</p>
         </div>
