@@ -1,13 +1,10 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
 import { config } from '@/config/env';
 
 export default function Home() {
-  const router = useRouter();
-
   const handleLogin = () => {
-    router.push(`${config.serverUrl}/api/auth/login`);
+    window.location.href = `${config.serverUrl}/api/auth/login`;
   };
 
   return (

@@ -5,8 +5,8 @@ import ActionStatusDashboard from '../components/ActionStatusDashboard';
 import ClientOnly from '../components/ClientOnly';
 import ThemeToggle from '../components/ThemeToggle';
 import FilterPanel from '../components/FilterPanel';
-import useGitHubToken from '@/hooks/useGitHubToken';
-import { config } from '@/config/env';
+import useAuth from '@/hooks/useAuth';
+import { apiRequest } from '@/utils/api';
 import Head from 'next/head';
 
 interface Repo {
@@ -41,7 +41,7 @@ interface WorkflowWithLatestRun {
 }
 
 function DashboardContent() {
-  const token = useGitHubToken();
+  const { authStatus, loading: authLoading } = useAuth();
   const [repos, setRepos] = useState<Repo[]>([]);
   const [selectedRepos, setSelectedRepos] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,17 +79,8 @@ function DashboardContent() {
   }, []);
 
   useEffect(() => {
-    if (token) {
-      fetch(`${config.serverUrl}/api/repos`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(async res => {
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ error: 'Network error' }));
-          throw new Error(errorData.message || errorData.error || `HTTP ${res.status}`);
-        }
-        return res.json();
-      })
+    if (authStatus?.authenticated) {
+      apiRequest('/api/repos')
       .then(data => {
         console.log('Received repos data:', data);
         if (Array.isArray(data)) {
@@ -106,7 +97,7 @@ function DashboardContent() {
         setLoading(false);
       });
     }
-  }, [token]);
+  }, [authStatus]);
 
   const handleRepoSelection = (repoId: number) => {
     const newSelectedRepos = selectedRepos.includes(repoId)
@@ -135,7 +126,7 @@ function DashboardContent() {
 
   // Function to load workflows for selected repositories
   const loadWorkflows = useCallback(async (repoIds: number[]) => {
-    if (!token || repoIds.length === 0) return;
+    if (!authStatus?.authenticated || repoIds.length === 0) return;
 
     setWorkflowsLoading(true);
     const newWorkflows: Record<number, WorkflowWithLatestRun[]> = {};
@@ -150,16 +141,8 @@ function DashboardContent() {
               return;
             }
 
-            const response = await fetch(`${config.serverUrl}/api/repos/${repo.full_name}/workflows`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              newWorkflows[repoId] = Array.isArray(data.workflows) ? data.workflows : [];
-            } else {
-              newWorkflows[repoId] = [];
-            }
+            const data = await apiRequest(`/api/repos/${repo.full_name}/workflows`);
+            newWorkflows[repoId] = Array.isArray(data.workflows) ? data.workflows : [];
           } catch (error) {
             console.error(`Error fetching workflows for repo ${repoId}:`, error);
             newWorkflows[repoId] = [];
@@ -174,25 +157,33 @@ function DashboardContent() {
     } finally {
       setWorkflowsLoading(false);
     }
-  }, [token, repos]);
+  }, [authStatus, repos]);
 
   // Check if selectedRepos changed and load workflows if needed
   useEffect(() => {
     const reposChanged = JSON.stringify(selectedRepos.sort()) !== JSON.stringify(lastSelectedRepos.sort());
 
-    if (reposChanged && selectedRepos.length > 0 && token) {
+    if (reposChanged && selectedRepos.length > 0 && authStatus?.authenticated) {
       loadWorkflows(selectedRepos);
     } else if (selectedRepos.length === 0) {
       setWorkflows({});
       setLastSelectedRepos([]);
     }
-  }, [selectedRepos, token, lastSelectedRepos, loadWorkflows]);
+  }, [selectedRepos, authStatus, lastSelectedRepos, loadWorkflows]);
 
 
 
   const onRefreshWorkflows = useCallback(async () => {
     await loadWorkflows(selectedRepos);
   }, [loadWorkflows, selectedRepos]);
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-lg">Checking authentication...</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
