@@ -147,7 +147,7 @@ router.get('/repos/:owner/:repo/workflows', requireAuth, async (req: Request, re
           workflow_name: workflow.name,
           workflow_path: workflow.path,
           workflow_state: workflow.state,
-          workflow_url: workflow.html_url,
+          workflow_url: workflow.html_url.replace(/\/blob\/[^\/]+\/\.github\/workflows\//, '/actions/workflows/'),
           latest_run: latestRun || null
         });
       } catch (runError: any) {
@@ -158,7 +158,7 @@ router.get('/repos/:owner/:repo/workflows', requireAuth, async (req: Request, re
           workflow_name: workflow.name,
           workflow_path: workflow.path,
           workflow_state: workflow.state,
-          workflow_url: workflow.html_url,
+          workflow_url: workflow.html_url.replace(/\/blob\/[^\/]+\/\.github\/workflows\//, '/actions/workflows/'),
           latest_run: null
         });
       }
