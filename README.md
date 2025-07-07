@@ -11,10 +11,11 @@ A modern and intuitive dashboard to monitor your GitHub repositories' Actions st
 
 - 🔐 **GitHub OAuth Authentication**: Secure login with your GitHub account
 - 📊 **Intuitive Dashboard**: Tab-based interface for better organization
-- 🔍 **Repository Selection**: Choose which repositories to monitor
-- 📈 **Real-time Status**: View GitHub Actions status updates
-- 🎨 **Modern Interface**: Responsive design with Tailwind CSS
+- 🔍 **Repository Selection & Filtering**: Easily choose, search, and filter repositories to monitor.
+- 📈 **Real-time Status**: View GitHub Actions status updates with auto-refresh capabilities.
+- 🎨 **Modern & Responsive Interface**: Built with Tailwind CSS, the dashboard is fully responsive. It uses a flexible grid layout that adapts to different screen sizes, from narrow mobile displays to ultra-wide monitors, ensuring excellent usability everywhere.
 - 🔄 **Auto-refresh**: Automatically updated data
+- 🌕 **Fullscreen Mode**: Expand the status view for a focused, clutter-free monitoring experience.
 
 ## 🏗️ Architecture
 
