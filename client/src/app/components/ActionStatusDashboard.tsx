@@ -229,6 +229,7 @@ export default function ActionStatusDashboard({
                   activeFilter={activeFilter}
                   onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
                   getStatusTotals={getStatusTotals}
+                  isLoading={workflowsLoading}
                 />
               );
             })}
@@ -355,6 +356,7 @@ export default function ActionStatusDashboard({
                 activeFilter={activeFilter}
                 onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
                 getStatusTotals={getStatusTotals}
+                isLoading={workflowsLoading}
               />
             );
           })}
