@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useState } from 'react';
 import RefreshControls from './RefreshControls';
 import RepositoryColumn from './RepositoryColumn';
 import SortControls from './SortControls';
+import useAutoRefresh from '@/hooks/useAutoRefresh';
 
 interface Repo {
   id: number;
@@ -52,107 +53,28 @@ export default function ActionStatusDashboard({
   onRefreshWorkflows
 }: Props) {
   const [activeFilters, setActiveFilters] = useState<Record<number, string | null>>({});
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState(30); // seconds
-  const [countdown, setCountdown] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  async function refreshWorkflows() {
+    await onRefreshWorkflows();
+    setLastUpdated(new Date());
+  }
+
+  const {
+    autoRefresh,
+    toggleAutoRefresh,
+    refreshInterval,
+    setRefreshInterval,
+    countdown,
+    isRefreshing,
+    manualRefresh
+  } = useAutoRefresh(refreshWorkflows, { interval: 30, enabled: selectedRepos.length > 0 });
+
   // Filtros de tipo e busca (iguais à aba de repositórios)
   const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Refs for intervals
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Function to refresh workflows data
-  const refreshWorkflows = async () => {
-    setIsRefreshing(true);
-    await onRefreshWorkflows();
-    setIsRefreshing(false);
-    setLastUpdated(new Date());
-  };
-
-  // Function to start auto refresh
-  const startAutoRefresh = () => {
-    if (refreshIntervalRef.current) return;
-
-    setCountdown(refreshInterval);
-
-    // Start countdown
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          refreshWorkflows();
-          return refreshInterval;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  // Function to stop auto refresh
-  const stopAutoRefresh = () => {
-    if (refreshIntervalRef.current) {
-      clearInterval(refreshIntervalRef.current);
-      refreshIntervalRef.current = null;
-    }
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    setCountdown(0);
-  };
-
-  // Function to toggle auto refresh
-  const toggleAutoRefresh = () => {
-    const newAutoRefresh = !autoRefresh;
-    setAutoRefresh(newAutoRefresh);
-
-    if (newAutoRefresh) {
-      startAutoRefresh();
-    } else {
-      stopAutoRefresh();
-    }
-  };
-
-  // Function to manual refresh
-  const handleManualRefresh = () => {
-    refreshWorkflows();
-    if (autoRefresh) {
-      setCountdown(refreshInterval);
-    }
-  };
-
-  useEffect(() => {
-    // Cleanup function
-    return () => {
-      stopAutoRefresh();
-    };
-  }, []);
-
-  // Effect to handle auto refresh changes
-  useEffect(() => {
-    if (autoRefresh && selectedRepos.length > 0) {
-      startAutoRefresh();
-    } else {
-      stopAutoRefresh();
-    }
-
-    return () => {
-      stopAutoRefresh();
-    };
-  }, [autoRefresh, refreshInterval, selectedRepos.length]);
-
-  // Effect to trigger refresh when countdown reaches zero
-  useEffect(() => {
-    if (autoRefresh && countdown <= 0) {
-      refreshWorkflows();
-    }
-  }, [countdown]);
 
   // Function to calculate status totals for a repository
   const getStatusTotals = (repoWorkflows: WorkflowWithLatestRun[]) => {
@@ -363,7 +285,7 @@ export default function ActionStatusDashboard({
             autoRefresh={autoRefresh}
             refreshInterval={refreshInterval}
             countdown={countdown}
-            onManualRefresh={handleManualRefresh}
+            onManualRefresh={manualRefresh}
             onToggleAutoRefresh={toggleAutoRefresh}
             onIntervalChange={setRefreshInterval}
           />

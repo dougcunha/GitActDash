@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import ActionStatusDashboard from '../components/ActionStatusDashboard';
 import ClientOnly from '../components/ClientOnly';
 import ThemeToggle from '../components/ThemeToggle';
 import SortControls from '../components/SortControls';
+import TabNavigation, { TabType } from '../components/TabNavigation';
+import useGitHubToken from '@/hooks/useGitHubToken';
 import { config } from '@/config/env';
 import Head from 'next/head';
 
@@ -40,15 +41,11 @@ interface WorkflowWithLatestRun {
   latest_run: WorkflowRun | null;
 }
 
-type TabType = 'repos' | 'actions';
-
 function DashboardContent() {
-  const searchParams = useSearchParams();
-  const [token, setToken] = useState<string | null>(null);
+  const token = useGitHubToken();
   const [repos, setRepos] = useState<Repo[]>([]);
   const [selectedRepos, setSelectedRepos] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('repos');
   const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,42 +57,14 @@ function DashboardContent() {
   const [workflowsLoading, setWorkflowsLoading] = useState(false);
   const [lastSelectedRepos, setLastSelectedRepos] = useState<number[]>([]);
 
-  // Handle client-side mounting
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    const accessToken = searchParams.get('token');
-    let currentToken = accessToken;
-
-    if (typeof window !== 'undefined') {
-      currentToken = accessToken || localStorage.getItem('github_token');
-
-      if (accessToken) {
-        localStorage.setItem('github_token', accessToken);
-        window.history.replaceState({}, document.title, "/dashboard");
-      }
-    }
-
-    if (!currentToken) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
-      return;
-    }
-
-    setToken(currentToken);
-
     if (typeof window !== 'undefined') {
       const storedSelectedRepos = localStorage.getItem('selected_repos');
       if (storedSelectedRepos) {
         setSelectedRepos(JSON.parse(storedSelectedRepos));
       }
     }
-  }, [searchParams, mounted]);
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -227,13 +196,6 @@ function DashboardContent() {
     return sortOrder === 'asc' ? compareValue : -compareValue;
   });
 
-  if (!mounted) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg">Loading...</p>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
@@ -259,39 +221,11 @@ function DashboardContent() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab('repos')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                activeTab === 'repos'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              Select Repositories
-              {selectedRepos.length > 0 && (
-                <span className="ml-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                  {selectedRepos.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('actions')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                activeTab === 'actions'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-              disabled={selectedRepos.length === 0}
-            >
-              Action Status
-              {selectedRepos.length === 0 && (
-                <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">(Select repos first)</span>
-              )}
-            </button>
-          </nav>
-        </div>
+        <TabNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          selectedCount={selectedRepos.length}
+        />
 
         {/* Tab Content */}
         {activeTab === 'repos' && (
