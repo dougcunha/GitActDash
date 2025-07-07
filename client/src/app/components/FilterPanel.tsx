@@ -105,7 +105,7 @@ export default function FilterPanel({
         )}
       </div>
 
-      <div className="flex items-center justify-between gap-2">
+      <div className="space-y-2">
         <SortControls
           sortBy={sortBy}
           sortOrder={sortOrder}
@@ -119,7 +119,7 @@ export default function FilterPanel({
         <select
           value={ownerFilter}
           onChange={(e) => setOwnerFilter(e.target.value as 'all' | 'personal' | string)}
-          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-600"
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-600"
         >
           <option value="all">All owners ({repos.length})</option>
           <option value="personal">Personal ({repos.filter(r => r.owner?.type === 'User').length})</option>
