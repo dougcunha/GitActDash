@@ -25,7 +25,7 @@ export default function useAutoRefresh(
   const start = () => {
     if (refreshIntervalRef.current || !enabled) return;
     setCountdown(refreshInterval);
-    countdownIntervalRef.current = setInterval(() => {
+    refreshIntervalRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
           refresh();
