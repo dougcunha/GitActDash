@@ -1,4 +1,17 @@
-# 🚀 GitActDash - GitHub Actions Dashboard
+# 🚀 GitActDash - GitHub## ✨ Features
+
+- 🔐 **GitHub OAuth Authentication**: Secure login with your GitHub account
+- 🛡️ **Secure Session Management**: Session-based authentication with HTTP-only cookies
+- 📊 **Intuitive Dashboard**: Tab-based interface for better organization
+- 🔍 **Repository Selection & Filtering**: Easily choose, search, and filter repositories to monitor
+- 📈 **Real-time Status**: View GitHub Actions status updates with auto-refresh capabilities
+- 🎨 **Modern & Responsive Interface**: Built with Tailwind CSS, the dashboard is fully responsive. It uses a flexible grid layout that adapts to different screen sizes, from narrow mobile displays to ultra-wide monitors, ensuring excellent usability everywhere
+- 🔄 **Auto-refresh**: Automatically updated data with configurable intervals
+- 🌕 **Fullscreen Mode**: Expand the status view for a focused, clutter-free monitoring experience
+- 🔄 **Loading Indicators**: Visual feedback with skeleton loaders and refresh indicators
+- 🎯 **Advanced Filtering**: Filter repositories by type (personal/organization) and workflow status
+- 🚨 **Failure Detection**: Quickly identify repositories with failed workflows
+- 🌐 **Production Ready**: Secure architecture ready for web hostingshboard
 
 ## Index
 
@@ -9,6 +22,7 @@
 - [📁 Project Structure](#project-structure)
 - [🔧 Available Scripts](#-available-scripts)
 - [🎯 How to Use](#-how-to-use)
+- [🌐 Web Hosting](#-web-hosting)
 - [🛠️ Technologies Used](#-technologies-used)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -62,9 +76,11 @@ A modern and intuitive dashboard to monitor your GitHub repositories' Actions st
 
 ### Backend (Server)
 - **Express.js** API server
+- **Session-based Authentication** with HTTP-only cookies
+- **Security Headers** (CSP, HSTS, CORS)
 - **GitHub OAuth** for authentication
 - **GitHub API** for repository data
-- **CORS** enabled for frontend-backend communication
+- **Production-ready security** middleware
 
 ## 🚀 Getting Started
 
@@ -131,6 +147,12 @@ CLIENT_URL=http://localhost:3000
 # GitHub OAuth App credentials
 GITHUB_CLIENT_ID=your_client_id_here
 GITHUB_CLIENT_SECRET=your_client_secret_here
+
+# Session security (generate a strong random secret for production)
+SESSION_SECRET=your-strong-random-session-secret-change-in-production
+
+# Environment
+NODE_ENV=development
 ```
 
 #### Frontend Configuration (Optional)
@@ -153,10 +175,12 @@ For production or containerized environments:
 
 ```env
 # server/.env (Production)
+NODE_ENV=production
 PORT=8080
 CLIENT_PORT=80
 SERVER_URL=https://api.yourdomain.com
 CLIENT_URL=https://yourdomain.com
+SESSION_SECRET=your-super-secure-random-string-min-32-chars
 ```
 
 ### 5. Run the project
@@ -223,6 +247,19 @@ npm run start --prefix client
 2. **Authorization**: Authorize the app on GitHub
 3. **Selection**: In the "Select Repositories" tab, choose repositories to monitor
 4. **Monitoring**: Access the "Action Status" tab to view GitHub Actions status
+5. **Filtering**: Use the various filters to focus on specific repositories or workflow states
+
+## 🌐 Web Hosting
+
+This application is designed to be safely hosted on the web with enterprise-grade security features:
+
+- ✅ **Session-based authentication** (no localStorage vulnerabilities)
+- ✅ **HTTP-only cookies** for token storage
+- ✅ **HTTPS enforcement** in production
+- ✅ **Security headers** (CSP, HSTS, CORS)
+- ✅ **CSRF protection** with secure cookies
+
+📖 **[Complete Web Hosting Guide](HOSTING_GUIDE.md)** - Detailed instructions for deploying to production with security best practices.
 
 ## 🛠️ Technologies Used
 
@@ -235,6 +272,8 @@ npm run start --prefix client
 
 ### Backend
 - Express.js 5+
+- Express-session for secure authentication
+- Helmet for security headers
 - Axios for HTTP requests
 - CORS for cross-origin communication
 - dotenv for environment variables
