@@ -41,7 +41,7 @@ A modern and intuitive dashboard to monitor your GitHub repositories' Actions st
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/gitactdash.git
+git clone https://github.com/dougcunha/gitactdash.git
 cd gitactdash
 ```
 
