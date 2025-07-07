@@ -1,6 +1,6 @@
 # 🚀 GitActDash - GitHub Actions Dashboard
 
-## Índice
+## Index
 
 - [✨ Features](#-features)
 - [🖼️ Screenshots](#screenshots)
@@ -45,6 +45,10 @@ A modern and intuitive dashboard to monitor your GitHub repositories' Actions st
 ### Full screen
 
 ![GitActDash Dark Full Screen](imgs/dark-full-screen.png)
+
+### Detailed repository view
+
+![GitActDash Detailed View](imgs/detailed-view.png)
 
 ## 🏗️ Architecture
 
