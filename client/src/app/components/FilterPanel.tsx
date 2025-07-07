@@ -17,8 +17,8 @@ interface Props {
   repos: Repo[];
   selectedRepos: number[];
   onRepoToggle: (id: number) => void;
-  repoFilter: 'all' | 'personal' | 'organization';
-  setRepoFilter: (val: 'all' | 'personal' | 'organization') => void;
+  ownerFilter: 'all' | 'personal' | string;
+  setOwnerFilter: (val: 'all' | 'personal' | string) => void;
   searchTerm: string;
   setSearchTerm: (val: string) => void;
   sortOrder: 'asc' | 'desc';
@@ -31,8 +31,8 @@ export default function FilterPanel({
   repos,
   selectedRepos,
   onRepoToggle,
-  repoFilter,
-  setRepoFilter,
+  ownerFilter,
+  setOwnerFilter,
   searchTerm,
   setSearchTerm,
   sortOrder,
@@ -40,18 +40,26 @@ export default function FilterPanel({
   sortBy,
   setSortBy,
 }: Props) {
+  const organizationNames = Array.from(
+    new Set(
+      repos
+        .filter(r => r.owner?.type === 'Organization')
+        .map(r => r.owner!.login)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
   const filteredRepos = repos
     .filter(repo => {
-      const typeFilter =
-        repoFilter === 'all' ||
-        (repoFilter === 'personal' && repo.owner?.type === 'User') ||
-        (repoFilter === 'organization' && repo.owner?.type === 'Organization');
+      const ownerMatch =
+        ownerFilter === 'all' ||
+        (ownerFilter === 'personal' && repo.owner?.type === 'User') ||
+        (repo.owner?.type === 'Organization' && repo.owner?.login === ownerFilter);
       const searchFilter =
         searchTerm === '' ||
         repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         repo.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (repo.owner?.login && repo.owner.login.toLowerCase().includes(searchTerm.toLowerCase()));
-      return typeFilter && searchFilter;
+      return ownerMatch && searchFilter;
     })
     .sort((a, b) => {
       let compareValue = 0;
@@ -97,50 +105,33 @@ export default function FilterPanel({
         )}
       </div>
 
-      <SortControls
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onSortByChange={setSortBy}
-        onSortOrderChange={setSortOrder}
-        showSortBySelector={true}
-        label="Sort by:"
-        size="sm"
-      />
+      <div className="flex items-center justify-between gap-2">
+        <SortControls
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortByChange={setSortBy}
+          onSortOrderChange={setSortOrder}
+          showSortBySelector={true}
+          label="Sort by:"
+          size="sm"
+        />
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => setRepoFilter('all')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
-            repoFilter === 'all'
-              ? 'bg-blue-600 dark:bg-blue-700 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
+        <select
+          value={ownerFilter}
+          onChange={(e) => setOwnerFilter(e.target.value as 'all' | 'personal' | string)}
+          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-600"
         >
-          All ({repos.length})
-        </button>
-        <button
-          onClick={() => setRepoFilter('personal')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
-            repoFilter === 'personal'
-              ? 'bg-green-600 dark:bg-green-700 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-        >
-          Personal ({repos.filter(r => r.owner?.type === 'User').length})
-        </button>
-        <button
-          onClick={() => setRepoFilter('organization')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
-            repoFilter === 'organization'
-              ? 'bg-blue-600 dark:bg-blue-700 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-        >
-          Organizations ({repos.filter(r => r.owner?.type === 'Organization').length})
-        </button>
+          <option value="all">All owners ({repos.length})</option>
+          <option value="personal">Personal ({repos.filter(r => r.owner?.type === 'User').length})</option>
+          {organizationNames.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {(searchTerm || repoFilter !== 'all') && (
+      {(searchTerm || ownerFilter !== 'all') && (
         <div className="text-xs text-gray-600 dark:text-gray-400">
           Showing {filteredRepos.length} of {repos.length} repositories
           {searchTerm && ` matching "${searchTerm}"`}
