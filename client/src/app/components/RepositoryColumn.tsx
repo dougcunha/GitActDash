@@ -60,7 +60,7 @@ export default function RepositoryColumn({
   const statusTotals = getStatusTotals(workflows);
 
   return (
-    <div className="flex-shrink-0 w-80 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm">
+    <div className="flex-shrink-0 w-80 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm flex flex-col">
       {/* Column Header with Repository Info and Status Totals */}
       <div className="bg-white dark:bg-gray-800 rounded-t-lg p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
@@ -89,9 +89,8 @@ export default function RepositoryColumn({
           filteredCount={filteredWorkflows.length}
         />
       </div>
-      
       {/* Workflows List */}
-      <div className="p-4 max-h-96 overflow-y-auto">
+      <div className="p-4 flex-1">
         {filteredWorkflows.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <svg className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

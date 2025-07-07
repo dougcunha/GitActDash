@@ -248,7 +248,7 @@ function DashboardContent() {
       <Head>
         <title>GitHub Actions Dashboard</title>
       </Head>
-      <div className="container mx-auto p-8 bg-white dark:bg-gray-900 min-h-screen">
+      <div className="w-full max-w-none px-8 bg-white dark:bg-gray-900 min-h-screen">
         {/* Header */}
         <div className="mb-8 flex justify-between items-start">
           <div>
@@ -382,7 +382,7 @@ function DashboardContent() {
                 </div>
               )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
               {filteredRepos.length > 0 ? (
                 filteredRepos.map((repo) => (
                   <div

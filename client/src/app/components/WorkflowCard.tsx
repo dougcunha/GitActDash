@@ -60,13 +60,13 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
           <p className="capitalize mb-1 flex items-center gap-1">
             <span className="font-medium">Status:</span>
             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor()}`}>
-              {workflow.latest_run.status === 'completed' 
-                ? workflow.latest_run.conclusion 
+              {workflow.latest_run.status === 'completed'
+                ? workflow.latest_run.conclusion
                 : workflow.latest_run.status}
             </span>
           </p>
           <p className="mb-1">
-            <span className="font-medium">Executed:</span> {new Date(workflow.latest_run.created_at).toLocaleDateString()}
+            <span className="font-medium">Executed:</span> {new Date(workflow.latest_run.created_at).toLocaleDateString()} at {new Date(workflow.latest_run.created_at).toLocaleTimeString()}
           </p>
           <p className="text-blue-600 dark:text-blue-400 font-medium">Click to view on GitHub →</p>
         </div>
