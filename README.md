@@ -106,7 +106,7 @@ Create a `client/.env.local` file to override default URLs:
 # Server URL (backend)
 NEXT_PUBLIC_SERVER_URL=http://localhost:3001
 
-# Client URL (frontend)  
+# Client URL (frontend)
 NEXT_PUBLIC_CLIENT_URL=http://localhost:3000
 ```
 
