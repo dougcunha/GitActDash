@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import RefreshControls from './RefreshControls';
 import RepositoryColumn from './RepositoryColumn';
 import SortControls from './SortControls';
+import useAutoRefresh from '@/hooks/useAutoRefresh';
 
 interface Repo {
   id: number;
@@ -52,110 +53,31 @@ export default function ActionStatusDashboard({
   onRefreshWorkflows
 }: Props) {
   const [activeFilters, setActiveFilters] = useState<Record<number, string | null>>({});
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState(30); // seconds
-  const [countdown, setCountdown] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const refreshWorkflows = useCallback(async () => {
+    await onRefreshWorkflows();
+    setLastUpdated(new Date());
+  }, [onRefreshWorkflows]);
+
+  const {
+    autoRefresh,
+    toggleAutoRefresh,
+    refreshInterval,
+    setRefreshInterval,
+    countdown,
+    isRefreshing,
+    manualRefresh
+  } = useAutoRefresh(refreshWorkflows, { interval: 30, enabled: selectedRepos.length > 0 });
 
   // Filtros de tipo e busca (iguais à aba de repositórios)
   const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Refs for intervals
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Function to refresh workflows data
-  const refreshWorkflows = async () => {
-    setIsRefreshing(true);
-    await onRefreshWorkflows();
-    setIsRefreshing(false);
-    setLastUpdated(new Date());
-  };
-
-  // Function to start auto refresh
-  const startAutoRefresh = () => {
-    if (refreshIntervalRef.current) return;
-
-    setCountdown(refreshInterval);
-
-    // Start countdown
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          refreshWorkflows();
-          return refreshInterval;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  // Function to stop auto refresh
-  const stopAutoRefresh = () => {
-    if (refreshIntervalRef.current) {
-      clearInterval(refreshIntervalRef.current);
-      refreshIntervalRef.current = null;
-    }
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    setCountdown(0);
-  };
-
-  // Function to toggle auto refresh
-  const toggleAutoRefresh = () => {
-    const newAutoRefresh = !autoRefresh;
-    setAutoRefresh(newAutoRefresh);
-
-    if (newAutoRefresh) {
-      startAutoRefresh();
-    } else {
-      stopAutoRefresh();
-    }
-  };
-
-  // Function to manual refresh
-  const handleManualRefresh = () => {
-    refreshWorkflows();
-    if (autoRefresh) {
-      setCountdown(refreshInterval);
-    }
-  };
-
-  useEffect(() => {
-    // Cleanup function
-    return () => {
-      stopAutoRefresh();
-    };
-  }, []);
-
-  // Effect to handle auto refresh changes
-  useEffect(() => {
-    if (autoRefresh && selectedRepos.length > 0) {
-      startAutoRefresh();
-    } else {
-      stopAutoRefresh();
-    }
-
-    return () => {
-      stopAutoRefresh();
-    };
-  }, [autoRefresh, refreshInterval, selectedRepos.length]);
-
-  // Effect to trigger refresh when countdown reaches zero
-  useEffect(() => {
-    if (autoRefresh && countdown <= 0) {
-      refreshWorkflows();
-    }
-  }, [countdown]);
-
   // Function to calculate status totals for a repository
-  const getStatusTotals = (repoWorkflows: WorkflowWithLatestRun[]) => {
+  const getStatusTotals = useCallback((repoWorkflows: WorkflowWithLatestRun[]) => {
     const totals = {
       success: 0,
       failure: 0,
@@ -181,10 +103,10 @@ export default function ActionStatusDashboard({
     });
 
     return totals;
-  };
+  }, []);
 
   // Function to get workflow status for filtering
-  const getWorkflowStatus = (workflow: WorkflowWithLatestRun): string => {
+  const getWorkflowStatus = useCallback((workflow: WorkflowWithLatestRun): string => {
     if (!workflow.latest_run) {
       return 'no_runs';
     } else if (workflow.latest_run.status === 'completed') {
@@ -194,27 +116,29 @@ export default function ActionStatusDashboard({
     } else {
       return 'no_runs';
     }
-  };
+  }, []);
 
   // Function to filter workflows based on active filter
-  const getFilteredWorkflows = (repoId: number, repoWorkflows: WorkflowWithLatestRun[]) => {
+  const getFilteredWorkflows = useCallback((repoId: number, repoWorkflows: WorkflowWithLatestRun[]) => {
     const activeFilter = activeFilters[repoId];
     if (!activeFilter) {
       return repoWorkflows;
     }
     return repoWorkflows.filter(workflow => getWorkflowStatus(workflow) === activeFilter);
-  };
+  }, [activeFilters, getWorkflowStatus]);
 
   // Function to handle filter toggle
-  const toggleFilter = (repoId: number, filterType: string) => {
-    setActiveFilters(prev => ({
-      ...prev,
-      [repoId]: prev[repoId] === filterType ? null : filterType
-    }));
-  };
+  const toggleFilter = useCallback((repoId: number, filterType: string) => {
+    setActiveFilters((prev) => {
+      if (prev[repoId] === filterType) {
+        return { ...prev, [repoId]: null };
+      }
+      return { ...prev, [repoId]: filterType };
+    });
+  }, []);
 
   // Function to get sorted repositories
-  const getSortedRepos = (): Repo[] => {
+  const getSortedRepos = useCallback((): Repo[] => {
     return selectedRepos
       .map(repoId => repos.find(r => r.id === repoId))
       .filter((repo): repo is Repo => repo !== undefined)
@@ -222,7 +146,7 @@ export default function ActionStatusDashboard({
         const compareValue = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         return sortOrder === 'asc' ? compareValue : -compareValue;
       });
-  };
+  }, [selectedRepos, repos, sortOrder]);
 
   const selectedReposDetails = selectedRepos
     .map(repoId => repos.find(r => r.id === repoId))
@@ -363,7 +287,7 @@ export default function ActionStatusDashboard({
             autoRefresh={autoRefresh}
             refreshInterval={refreshInterval}
             countdown={countdown}
-            onManualRefresh={handleManualRefresh}
+            onManualRefresh={manualRefresh}
             onToggleAutoRefresh={toggleAutoRefresh}
             onIntervalChange={setRefreshInterval}
           />
