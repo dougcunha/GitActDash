@@ -1,5 +1,19 @@
 # 🚀 GitActDash - GitHub Actions Dashboard
 
+## Índice
+
+- [✨ Features](#-features)
+- [🖼️ Screenshots](#screenshots)
+- [🏗️ Architecture](#-architecture)
+- [🚀 Getting Started](#-getting-started)
+- [📁 Project Structure](#project-structure)
+- [🔧 Available Scripts](#-available-scripts)
+- [🎯 How to Use](#-how-to-use)
+- [🛠️ Technologies Used](#-technologies-used)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+
 A modern and intuitive dashboard to monitor your GitHub repositories' Actions status in real-time.
 
 ![GitHub Actions Dashboard](https://img.shields.io/badge/Status-Active-green)
@@ -16,6 +30,21 @@ A modern and intuitive dashboard to monitor your GitHub repositories' Actions st
 - 🎨 **Modern & Responsive Interface**: Built with Tailwind CSS, the dashboard is fully responsive. It uses a flexible grid layout that adapts to different screen sizes, from narrow mobile displays to ultra-wide monitors, ensuring excellent usability everywhere.
 - 🔄 **Auto-refresh**: Automatically updated data
 - 🌕 **Fullscreen Mode**: Expand the status view for a focused, clutter-free monitoring experience.
+
+
+## 🖼️ Screenshots
+
+### Dark theme
+
+![GitActDash Dark Theme](imgs/dark-theme.png)
+
+### White theme
+
+![GitActDash Light Theme](imgs/white-theme.png)
+
+### Full screen
+
+![GitActDash Dark Full Screen](imgs/dark-full-screen.png)
 
 ## 🏗️ Architecture
 
