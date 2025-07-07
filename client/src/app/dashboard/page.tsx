@@ -47,7 +47,7 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
+  const [ownerFilter, setOwnerFilter] = useState<'all' | 'personal' | string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [sortBy, setSortBy] = useState<'name' | 'full_name' | 'updated_at'>('name');
@@ -188,8 +188,8 @@ function DashboardContent() {
               repos={repos}
               selectedRepos={selectedRepos}
               onRepoToggle={handleRepoSelection}
-              repoFilter={repoFilter}
-              setRepoFilter={setRepoFilter}
+              ownerFilter={ownerFilter}
+              setOwnerFilter={setOwnerFilter}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               sortOrder={sortOrder}
