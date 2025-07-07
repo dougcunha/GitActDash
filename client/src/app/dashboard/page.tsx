@@ -63,6 +63,18 @@ function DashboardContent() {
       if (storedSelectedRepos) {
         setSelectedRepos(JSON.parse(storedSelectedRepos));
       }
+
+      // Load sorting preferences
+      const storedSortBy = localStorage.getItem('sort_by');
+      const storedSortOrder = localStorage.getItem('sort_order');
+      
+      if (storedSortBy && ['name', 'full_name', 'updated_at'].includes(storedSortBy)) {
+        setSortBy(storedSortBy as 'name' | 'full_name' | 'updated_at');
+      }
+      
+      if (storedSortOrder && ['asc', 'desc'].includes(storedSortOrder)) {
+        setSortOrder(storedSortOrder as 'asc' | 'desc');
+      }
     }
   }, []);
 
@@ -104,6 +116,20 @@ function DashboardContent() {
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('selected_repos', JSON.stringify(newSelectedRepos));
+    }
+  };
+
+  const handleSortByChange = (newSortBy: 'name' | 'full_name' | 'updated_at') => {
+    setSortBy(newSortBy);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sort_by', newSortBy);
+    }
+  };
+
+  const handleSortOrderChange = (newSortOrder: 'asc' | 'desc') => {
+    setSortOrder(newSortOrder);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sort_order', newSortOrder);
     }
   };
 
@@ -193,13 +219,13 @@ function DashboardContent() {
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
+              setSortOrder={handleSortOrderChange}
               sortBy={sortBy}
-              setSortBy={setSortBy}
+              setSortBy={handleSortByChange}
             />
             <button
               onClick={() => setIsFilterOpen(false)}
-              className="absolute top-2 right-2 p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              className="absolute top-4 -right-2 p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors z-20"
               title="Hide filters"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +237,7 @@ function DashboardContent() {
         {!isFilterOpen && !isFullscreen && (
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="absolute top-4 left-4 z-10 p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+            className="fixed top-4 left-4 z-20 p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors"
             title="Show filters"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,7 +245,7 @@ function DashboardContent() {
             </svg>
           </button>
         )}
-        <div className="flex-1 px-8">
+        <div className={`flex-1 ${!isFilterOpen && !isFullscreen ? 'pl-16' : 'px-8'}`}>
           <div className="mb-8 flex justify-between items-start pt-4">
             <div>
               <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">GitHub Actions Dashboard</h1>
