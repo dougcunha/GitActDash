@@ -2,26 +2,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import SortControls from './SortControls';
-
-interface Repo {
-  id: number;
-  name: string;
-  full_name: string;
-  private: boolean;
-  owner?: {
-    login: string;
-    type: 'User' | 'Organization';
-    avatar_url?: string;
-  };
-  updated_at: string;
-  description?: string;
-  language?: string;
-  stargazers_count?: number;
-  forks_count?: number;
-  archived?: boolean;
-  pushed_at?: string;
-  topics?: string[];
-}
+import type { Repo } from '@/types/github';
+import { formatRelativeTime } from '@/utils/time';
 
 interface Props {
   repos: Repo[];
@@ -52,18 +34,6 @@ export default function FilterPanel({
 }: Props) {
   const [viewMode, setViewMode] = useState<'simple' | 'detailed'>('simple');
   
-  const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
-    if (diffInDays < 7) return `${diffInDays} days ago`;
-    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-    if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
-    return `${Math.floor(diffInDays / 365)} years ago`;
-  };
   
   const organizationNames = Array.from(
     new Set(

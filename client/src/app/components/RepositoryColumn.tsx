@@ -2,37 +2,7 @@
 
 import StatusTotals from './StatusTotals';
 import WorkflowCard from './WorkflowCard';
-
-interface Repo {
-  id: number;
-  name: string;
-  full_name: string;
-  private?: boolean;
-  owner?: {
-    login: string;
-    type: 'User' | 'Organization';
-  };
-  updated_at?: string;
-}
-
-interface WorkflowRun {
-  id: number;
-  name: string;
-  status: string;
-  conclusion: string | null;
-  html_url: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface WorkflowWithLatestRun {
-  workflow_id: number;
-  workflow_name: string;
-  workflow_path: string;
-  workflow_state: string;
-  workflow_url: string;
-  latest_run: WorkflowRun | null;
-}
+import type { Repo, WorkflowWithLatestRun } from '@/types/github';
 
 interface RepositoryColumnProps {
   repo: Repo;
