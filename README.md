@@ -1,17 +1,9 @@
-# 🚀 GitActDash - GitHub## ✨ Features
+A modern and intuitive dashboard to monitor your GitHub repositories' Actions status in real-time.
 
-- 🔐 **GitHub OAuth Authentication**: Secure login with your GitHub account
-- 🛡️ **Secure Session Management**: Session-based authentication with HTTP-only cookies
-- 📊 **Intuitive Dashboard**: Tab-based interface for better organization
-- 🔍 **Repository Selection & Filtering**: Easily choose, search, and filter repositories to monitor
-- 📈 **Real-time Status**: View GitHub Actions status updates with auto-refresh capabilities
-- 🎨 **Modern & Responsive Interface**: Built with Tailwind CSS, the dashboard is fully responsive. It uses a flexible grid layout that adapts to different screen sizes, from narrow mobile displays to ultra-wide monitors, ensuring excellent usability everywhere
-- 🔄 **Auto-refresh**: Automatically updated data with configurable intervals
-- 🌕 **Fullscreen Mode**: Expand the status view for a focused, clutter-free monitoring experience
-- 🔄 **Loading Indicators**: Visual feedback with skeleton loaders and refresh indicators
-- 🎯 **Advanced Filtering**: Filter repositories by type (personal/organization) and workflow status
-- 🚨 **Failure Detection**: Quickly identify repositories with failed workflows
-- 🌐 **Production Ready**: Secure architecture ready for web hostingshboard
+![GitHub Actions Dashboard](https://img.shields.io/badge/Status-Active-green)
+![Node.js](https://img.shields.io/badge/Node.js-v18+-green)
+![Next.js](https://img.shields.io/badge/Next.js-15.3.5-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8+-blue)
 
 ## Index
 
@@ -28,24 +20,20 @@
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
 
-A modern and intuitive dashboard to monitor your GitHub repositories' Actions status in real-time.
-
-![GitHub Actions Dashboard](https://img.shields.io/badge/Status-Active-green)
-![Node.js](https://img.shields.io/badge/Node.js-v18+-green)
-![Next.js](https://img.shields.io/badge/Next.js-15.3.5-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8+-blue)
-
 ## ✨ Features
 
 - 🔐 **GitHub OAuth Authentication**: Secure login with your GitHub account
-- �️ **Secure Session Management**: Session-based authentication with HTTP-only cookies
-- �📊 **Intuitive Dashboard**: Tab-based interface for better organization
-- 🔍 **Repository Selection & Filtering**: Easily choose, search, and filter repositories to monitor.
-- 📈 **Real-time Status**: View GitHub Actions status updates with auto-refresh capabilities.
-- 🎨 **Modern & Responsive Interface**: Built with Tailwind CSS, the dashboard is fully responsive. It uses a flexible grid layout that adapts to different screen sizes, from narrow mobile displays to ultra-wide monitors, ensuring excellent usability everywhere.
-- 🔄 **Auto-refresh**: Automatically updated data
-- 🌕 **Fullscreen Mode**: Expand the status view for a focused, clutter-free monitoring experience.
+- 🛡️ **Secure Session Management**: Session-based authentication with HTTP-only cookies
+- 📊 **Intuitive Dashboard**: Tab-based interface for better organization
+- 🔍 **Repository Selection & Filtering**: Easily choose, search, and filter repositories to monitor
+- 📈 **Real-time Status**: View GitHub Actions status updates with auto-refresh capabilities
+- 🎨 **Modern & Responsive Interface**: Built with Tailwind CSS, the dashboard is fully responsive. It uses a flexible grid layout that adapts to different screen sizes, from narrow mobile displays to ultra-wide monitors, ensuring excellent usability everywhere
+- 🔄 **Auto-refresh**: Automatically updated data with configurable intervals
+- 🌕 **Fullscreen Mode**: Expand the status view for a focused, clutter-free monitoring experience
 - 🔄 **Loading Indicators**: Visual feedback with skeleton loaders and refresh indicators
+- 🎯 **Advanced Filtering**: Filter repositories by type (personal/organization) and workflow status
+- 🚨 **Failure Detection**: Quickly identify repositories with failed workflows
+- 🌐 **Production Ready**: Secure architecture ready for web hostingshboard
 
 
 ## 🖼️ Screenshots
