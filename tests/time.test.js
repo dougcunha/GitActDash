@@ -1,4 +1,4 @@
-const { formatRelativeTime } = require('./dist/client/src/utils/time');
+const { formatRelativeTime } = require('./dist/time');
 const assert = require('assert');
 
 const now = Date.now();
