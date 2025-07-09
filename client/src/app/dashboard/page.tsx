@@ -192,7 +192,7 @@ function DashboardContent() {
         <title>GitHub Actions Dashboard</title>
       </Head>
       <div className="flex w-full max-w-none min-h-screen bg-white dark:bg-gray-900 relative">
-        {/* Mobile hamburger */}
+        {/* Hamburger button */}
         {!isFilterOpen && !isFullscreen && (
           <button
             onClick={() => setIsFilterOpen(true)}
@@ -205,17 +205,17 @@ function DashboardContent() {
           </button>
         )}
 
-        {/* Overlay for mobile */}
+        {/* Overlay */}
         {isFilterOpen && !isFullscreen && (
           <div
-            className="fixed inset-0 bg-black/30 z-20 md:hidden"
+            className="fixed inset-0 bg-black/30 z-20"
             onClick={() => setIsFilterOpen(false)}
           />
         )}
 
         {/* Filter drawer */}
         <div
-          className={`fixed inset-y-0 left-0 z-30 transform transition-transform duration-200 md:static md:translate-x-0 md:z-auto bg-white dark:bg-gray-900 ${
+          className={`fixed inset-y-0 left-0 z-30 transform transition-transform duration-200 bg-white dark:bg-gray-900 ${
             isFilterOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
