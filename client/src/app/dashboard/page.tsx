@@ -17,7 +17,7 @@ function DashboardContent() {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [selectedRepos, setSelectedRepos] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isFilterOpen, setIsFilterOpen] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState<'all' | 'personal' | string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,6 +29,15 @@ function DashboardContent() {
   const [workflowsLoading, setWorkflowsLoading] = useState(false);
   const [lastSelectedRepos, setLastSelectedRepos] = useState<number[]>([]);
   const [initialWorkflowsLoaded, setInitialWorkflowsLoaded] = useState(false);
+
+  // Open filter panel by default on wider screens
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth >= 768) {
+        setIsFilterOpen(true);
+      }
+    }
+  }, []);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -191,8 +200,34 @@ function DashboardContent() {
         <title>GitHub Actions Dashboard</title>
       </Head>
       <div className="flex w-full max-w-none min-h-screen bg-white dark:bg-gray-900 relative">
+        {/* Mobile hamburger */}
+        {!isFilterOpen && !isFullscreen && (
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="fixed top-4 left-4 z-30 p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors md:hidden"
+            title="Show filters"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
+
+        {/* Overlay for mobile */}
         {isFilterOpen && !isFullscreen && (
-          <div className="relative">
+          <div
+            className="fixed inset-0 bg-black/30 z-20 md:hidden"
+            onClick={() => setIsFilterOpen(false)}
+          />
+        )}
+
+        {/* Filter drawer */}
+        <div
+          className={`fixed inset-y-0 left-0 z-30 transform transition-transform duration-200 md:static md:translate-x-0 md:z-auto bg-white dark:bg-gray-900 ${
+            isFilterOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <div className="relative h-full">
             <FilterPanel
               repos={repos}
               selectedRepos={selectedRepos}
@@ -208,7 +243,7 @@ function DashboardContent() {
             />
             <button
               onClick={() => setIsFilterOpen(false)}
-              className="absolute top-4 -right-2 p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors z-20"
+              className="absolute top-4 -right-2 p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors md:hidden"
               title="Hide filters"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,19 +251,9 @@ function DashboardContent() {
               </svg>
             </button>
           </div>
-        )}
-        {!isFilterOpen && !isFullscreen && (
-          <button
-            onClick={() => setIsFilterOpen(true)}
-            className="fixed top-4 left-4 z-20 p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors"
-            title="Show filters"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        )}
-        <div className={`flex-1 ${!isFilterOpen && !isFullscreen ? 'pl-16' : 'px-8'}`}>
+        </div>
+
+        <div className="flex-1 px-4 md:px-8">
           <div className="mb-8 flex justify-between items-start pt-4">
             <div>
               <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">GitHub Actions Dashboard</h1>
