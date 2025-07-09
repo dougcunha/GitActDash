@@ -213,7 +213,13 @@ function DashboardContent() {
         )}
 
         {/* Sidebar */}
-        <div className={`fixed top-0 left-0 h-full bg-white dark:bg-gray-800 shadow-xl z-40 transition-transform transform ${isFilterOpen && !isFullscreen ? 'translate-x-0' : '-translate-x-full'} ease-in-out duration-300`}>
+        <div 
+          role="dialog" 
+          aria-modal="true" 
+          aria-labelledby="filter-panel-title" 
+          className={`fixed top-0 left-0 h-full bg-white dark:bg-gray-800 shadow-xl z-40 transition-transform transform ${isFilterOpen && !isFullscreen ? 'translate-x-0' : '-translate-x-full'} ease-in-out duration-300`}
+        >
+          <h2 id="filter-panel-title" className="sr-only">Filter Panel</h2>
           <FilterPanel
             repos={repos}
             selectedRepos={selectedRepos}
