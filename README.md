@@ -1,10 +1,12 @@
-A modern and intuitive dashboard to monitor your GitHub repositories' Actions status in real-time.
-
 ![GitHub Actions Dashboard](https://img.shields.io/badge/Status-Active-green)
 ![Node.js](https://img.shields.io/badge/Node.js-v18+-green)
 ![Next.js](https://img.shields.io/badge/Next.js-15.3.5-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8+-blue)
 [![CI](https://github.com/dougcunha/GitActDash/actions/workflows/ci.yml/badge.svg)](https://github.com/dougcunha/GitActDash/actions/workflows/ci.yml)
+
+# GAD - GitHub Actions Dashboard
+
+- A modern and intuitive dashboard to monitor your GitHub repositories' Actions.
 
 ## Index
 

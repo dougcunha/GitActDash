@@ -188,7 +188,7 @@ function DashboardContent() {
   return (
     <>
       <Head>
-        <title>GitHub Actions Dashboard</title>
+        <title>GAD - GitHub Actions Dashboard</title>
       </Head>
       <div className="w-full max-w-none min-h-screen bg-white dark:bg-gray-900">
         
@@ -237,9 +237,9 @@ function DashboardContent() {
         </div>
         
         <div className={`flex-1 transition-all duration-300 ${!isFullscreen ? 'px-8' : ''}`}>
-          <div className={`mb-8 flex justify-between items-start pt-4 ${!isFullscreen ? 'pl-16' : ''}`}>
+          <div className={`mb-8 flex justify-between items-start pt-4 ${!isFullscreen ? 'pl-10' : ''}`}>
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">GitHub Actions Dashboard</h1>
+              <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">GAD - GitHub Actions Dashboard</h1>
               <p className="text-gray-600 dark:text-gray-400">Monitor your GitHub repositories and their action statuses.</p>
             </div>
             <ThemeToggle />

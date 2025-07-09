@@ -209,11 +209,10 @@ export default function ActionStatusDashboard({
   }
 
   return (
-    <div className="mt-12">
+    <div className="mt-6">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Action Status</h2>
+        <div className="flex justify-between items-center">          
           {lastUpdated && (
             <span className="text-sm text-gray-500 dark:text-gray-400">
               Last updated: {lastUpdated.toLocaleTimeString()}

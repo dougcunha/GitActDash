@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GitHub Actions Dashboard",
+  title: "GAD - GitHub Actions Dashboard",
   description: "Monitor your GitHub repositories and their action statuses.",
 };
 
