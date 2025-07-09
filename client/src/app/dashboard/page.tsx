@@ -219,29 +219,34 @@ function DashboardContent() {
             isFilterOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="relative h-full">
-            <FilterPanel
-              repos={repos}
-              selectedRepos={selectedRepos}
-              onRepoToggle={handleRepoSelection}
-              ownerFilter={ownerFilter}
-              setOwnerFilter={setOwnerFilter}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              sortOrder={sortOrder}
-              setSortOrder={handleSortOrderChange}
-              sortBy={sortBy}
-              setSortBy={handleSortByChange}
-            />
-            <button
-              onClick={() => setIsFilterOpen(false)}
-              className="absolute top-4 -right-2 p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors"
-              title="Hide filters"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+          <div className="flex flex-col h-full w-80 sm:w-96">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Filters</h2>
+              <button
+                onClick={() => setIsFilterOpen(false)}
+                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                title="Close menu"
+              >
+                <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <FilterPanel
+                repos={repos}
+                selectedRepos={selectedRepos}
+                onRepoToggle={handleRepoSelection}
+                ownerFilter={ownerFilter}
+                setOwnerFilter={setOwnerFilter}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                sortOrder={sortOrder}
+                setSortOrder={handleSortOrderChange}
+                sortBy={sortBy}
+                setSortBy={handleSortByChange}
+              />
+            </div>
           </div>
         </div>
 
