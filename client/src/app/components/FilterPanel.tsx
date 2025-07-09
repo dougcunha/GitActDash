@@ -67,7 +67,7 @@ export default function FilterPanel({
           compareValue = a.full_name.toLowerCase().localeCompare(b.full_name.toLowerCase());
           break;
         case 'updated_at':
-          compareValue = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+          compareValue = new Date(a.updated_at || 0).getTime() - new Date(b.updated_at || 0).getTime();
           break;
         default:
           compareValue = a.name.toLowerCase().localeCompare(b.name.toLowerCase());

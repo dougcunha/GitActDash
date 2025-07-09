@@ -25,22 +25,16 @@ export default function useAuth() {
       if (response.ok) {
         const data = await response.json();
         setAuthStatus(data);
-        
-        if (!data.authenticated) {
-          router.push('/');
-        }
       } else {
         setAuthStatus({ authenticated: false });
-        router.push('/');
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
       setAuthStatus({ authenticated: false });
-      router.push('/');
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     checkAuthStatus();

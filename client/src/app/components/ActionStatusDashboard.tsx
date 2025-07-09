@@ -149,7 +149,6 @@ export default function ActionStatusDashboard({
   const organizationReposCount = selectedReposDetails.filter(r => r.owner?.type === 'Organization').length;
   const failedWorkflowReposCount = selectedRepos.filter(repoId => hasFailedWorkflows(repoId)).length;
 
-  // Repositórios filtrados
   const filteredRepos = getSortedRepos().filter(repo => {
     const typeFilter =
       repoFilter === 'all' ||
@@ -184,23 +183,24 @@ export default function ActionStatusDashboard({
             </svg>
             <span className="sr-only">Exit Fullscreen</span>
           </button>
-          <div className="grid gap-6 pb-4 mt-12 grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
+          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 pb-4 mt-12" style={{ columnWidth: '340px', columnGap: '16px' }}>
             {filteredRepos.map((repo) => {
               if (!repo) return null;
               const repoWorkflows = workflows[repo.id] || [];
               const filteredWorkflows = getFilteredWorkflows(repo.id, repoWorkflows);
               const activeFilter = activeFilters[repo.id];
               return (
-                <RepositoryColumn
-                  key={repo.id}
-                  repo={repo}
-                  workflows={repoWorkflows}
-                  filteredWorkflows={filteredWorkflows}
-                  activeFilter={activeFilter}
-                  onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
-                  getStatusTotals={getStatusTotals}
-                  isLoading={workflowsLoading}
-                />
+                <div key={repo.id} className="break-inside-avoid mb-4">
+                  <RepositoryColumn
+                    repo={repo}
+                    workflows={repoWorkflows}
+                    filteredWorkflows={filteredWorkflows}
+                    activeFilter={activeFilter}
+                    onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
+                    getStatusTotals={getStatusTotals}
+                    isLoading={workflowsLoading}
+                  />
+                </div>
               );
             })}
           </div>
@@ -311,23 +311,24 @@ export default function ActionStatusDashboard({
           <p>Select repositories to view their action status</p>
         </div>
       ) : (
-        <div className="grid gap-6 pb-4 grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
+        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 pb-4" style={{ columnWidth: '340px', columnGap: '16px' }}>
           {filteredRepos.map((repo) => {
             if (!repo) return null;
             const repoWorkflows = workflows[repo.id] || [];
             const filteredWorkflows = getFilteredWorkflows(repo.id, repoWorkflows);
             const activeFilter = activeFilters[repo.id];
             return (
-              <RepositoryColumn
-                key={repo.id}
-                repo={repo}
-                workflows={repoWorkflows}
-                filteredWorkflows={filteredWorkflows}
-                activeFilter={activeFilter}
-                onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
-                getStatusTotals={getStatusTotals}
-                isLoading={workflowsLoading}
-              />
+              <div key={repo.id} className="break-inside-avoid mb-4">
+                <RepositoryColumn
+                  repo={repo}
+                  workflows={repoWorkflows}
+                  filteredWorkflows={filteredWorkflows}
+                  activeFilter={activeFilter}
+                  onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
+                  getStatusTotals={getStatusTotals}
+                  isLoading={workflowsLoading}
+                />
+              </div>
             );
           })}
         </div>

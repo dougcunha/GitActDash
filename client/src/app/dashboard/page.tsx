@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import ActionStatusDashboard from '../components/ActionStatusDashboard';
 import ClientOnly from '../components/ClientOnly';
 import ThemeToggle from '../components/ThemeToggle';
@@ -8,10 +9,11 @@ import FilterPanel from '../components/FilterPanel';
 import useAuth from '@/hooks/useAuth';
 import { apiRequest } from '@/utils/api';
 import Head from 'next/head';
-import type { Repo, WorkflowRun, WorkflowWithLatestRun } from '@/types/github';
+import type { Repo, WorkflowWithLatestRun } from '@/types/github';
 
 function DashboardContent() {
   const { authStatus, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [repos, setRepos] = useState<Repo[]>([]);
   const [selectedRepos, setSelectedRepos] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,12 +28,21 @@ function DashboardContent() {
   const [workflows, setWorkflows] = useState<Record<number, WorkflowWithLatestRun[]>>({});
   const [workflowsLoading, setWorkflowsLoading] = useState(false);
   const [lastSelectedRepos, setLastSelectedRepos] = useState<number[]>([]);
+  const [initialWorkflowsLoaded, setInitialWorkflowsLoaded] = useState(false);
+
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!authLoading && authStatus && !authStatus.authenticated) {
+      router.push('/');
+    }
+  }, [authStatus, authLoading, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedSelectedRepos = localStorage.getItem('selected_repos');
       if (storedSelectedRepos) {
-        setSelectedRepos(JSON.parse(storedSelectedRepos));
+        const parsedRepos = JSON.parse(storedSelectedRepos);
+        setSelectedRepos(parsedRepos);
       }
 
       // Load sorting preferences
@@ -74,6 +85,9 @@ function DashboardContent() {
       ? selectedRepos.filter((id) => id !== repoId)
       : [...selectedRepos, repoId];
     setSelectedRepos(newSelectedRepos);
+    
+    // Reset the initial loaded flag when repos change
+    setInitialWorkflowsLoaded(false);
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('selected_repos', JSON.stringify(newSelectedRepos));
@@ -140,6 +154,14 @@ function DashboardContent() {
       setLastSelectedRepos([]);
     }
   }, [selectedRepos, authStatus, lastSelectedRepos, loadWorkflows]);
+
+  // Initial load of workflows when repos are loaded and selectedRepos is available
+  useEffect(() => {
+    if (!loading && repos.length > 0 && selectedRepos.length > 0 && authStatus?.authenticated && !initialWorkflowsLoaded) {
+      loadWorkflows(selectedRepos);
+      setInitialWorkflowsLoaded(true);
+    }
+  }, [loading, repos, selectedRepos, authStatus, initialWorkflowsLoaded, loadWorkflows]);
 
 
 
