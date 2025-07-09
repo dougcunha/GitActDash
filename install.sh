@@ -1,5 +1,5 @@
 #!/bin/bash
-# Instala as dependências do projeto (root, client e server)
+# Install project dependencies (root, client e server)
 
 echo "Installing root dependencies..."
 npm install

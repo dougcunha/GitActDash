@@ -1,5 +1,5 @@
 @echo off
-REM Executa o projeto em modo de desenvolvimento
+REM Run the project in development mode.
 
 echo "Starting the server in a new window..."
 start "Server" cmd /c "cd server && npm run dev"

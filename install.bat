@@ -1,5 +1,5 @@
 @echo off
-REM Instala as dependências do projeto (root, client e server)
+REM Install project dependencies (root, client e server)
 
 echo "Installing root dependencies..."
 npm install
