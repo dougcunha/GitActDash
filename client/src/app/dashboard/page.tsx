@@ -17,7 +17,7 @@ function DashboardContent() {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [selectedRepos, setSelectedRepos] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isFilterOpen, setIsFilterOpen] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState<'all' | 'personal' | string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -190,46 +190,48 @@ function DashboardContent() {
       <Head>
         <title>GitHub Actions Dashboard</title>
       </Head>
-      <div className="flex w-full max-w-none min-h-screen bg-white dark:bg-gray-900 relative">
-        {isFilterOpen && !isFullscreen && (
-          <div className="relative">
-            <FilterPanel
-              repos={repos}
-              selectedRepos={selectedRepos}
-              onRepoToggle={handleRepoSelection}
-              ownerFilter={ownerFilter}
-              setOwnerFilter={setOwnerFilter}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              sortOrder={sortOrder}
-              setSortOrder={handleSortOrderChange}
-              sortBy={sortBy}
-              setSortBy={handleSortByChange}
-            />
-            <button
-              onClick={() => setIsFilterOpen(false)}
-              className="absolute top-4 -right-2 p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors z-20"
-              title="Hide filters"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        )}
+      <div className="w-full max-w-none min-h-screen bg-white dark:bg-gray-900">
+        
         {!isFilterOpen && !isFullscreen && (
           <button
             onClick={() => setIsFilterOpen(true)}
             className="fixed top-4 left-4 z-20 p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors"
             title="Show filters"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zM3 16a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z"></path>
             </svg>
           </button>
         )}
-        <div className={`flex-1 ${!isFilterOpen && !isFullscreen ? 'pl-16' : 'px-8'}`}>
-          <div className="mb-8 flex justify-between items-start pt-4">
+
+        {/* Overlay */}
+        {isFilterOpen && !isFullscreen && (
+          <div 
+            onClick={() => setIsFilterOpen(false)} 
+            className="fixed inset-0 bg-black/60 z-30 transition-opacity"
+          ></div>
+        )}
+
+        {/* Sidebar */}
+        <div className={`fixed top-0 left-0 h-full bg-white dark:bg-gray-800 shadow-xl z-40 transition-transform transform ${isFilterOpen && !isFullscreen ? 'translate-x-0' : '-translate-x-full'} ease-in-out duration-300`}>
+          <FilterPanel
+            repos={repos}
+            selectedRepos={selectedRepos}
+            onRepoToggle={handleRepoSelection}
+            ownerFilter={ownerFilter}
+            setOwnerFilter={setOwnerFilter}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            sortOrder={sortOrder}
+            setSortOrder={handleSortOrderChange}
+            sortBy={sortBy}
+            setSortBy={handleSortByChange}
+            onClose={() => setIsFilterOpen(false)}
+          />
+        </div>
+        
+        <div className={`flex-1 transition-all duration-300 ${!isFullscreen ? 'px-8' : ''}`}>
+          <div className={`mb-8 flex justify-between items-start pt-4 ${!isFullscreen ? 'pl-16' : ''}`}>
             <div>
               <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">GitHub Actions Dashboard</h1>
               <p className="text-gray-600 dark:text-gray-400">Monitor your GitHub repositories and their action statuses.</p>
@@ -250,6 +252,8 @@ function DashboardContent() {
     </>
   );
 }
+
+
 
 export default function Dashboard() {
   return (
