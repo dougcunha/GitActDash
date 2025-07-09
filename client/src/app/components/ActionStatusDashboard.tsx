@@ -65,7 +65,6 @@ export default function ActionStatusDashboard({
     manualRefresh
   } = useAutoRefresh(refreshWorkflows, { interval: 30, enabled: selectedRepos.length > 0 });
 
-  // Filtros de tipo e busca (iguais à aba de repositórios)
   const [repoFilter, setRepoFilter] = useState<'all' | 'personal' | 'organization'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -183,7 +182,7 @@ export default function ActionStatusDashboard({
             </svg>
             <span className="sr-only">Exit Fullscreen</span>
           </button>
-          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 pb-4 mt-12" style={{ columnWidth: '340px', columnGap: '16px' }}>
+          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 4xl:columns-9 pb-4 mt-12" style={{ columnWidth: '340px', columnGap: '16px' }}>
             {filteredRepos.map((repo) => {
               if (!repo) return null;
               const repoWorkflows = workflows[repo.id] || [];
@@ -311,7 +310,7 @@ export default function ActionStatusDashboard({
           <p>Select repositories to view their action status</p>
         </div>
       ) : (
-        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 pb-4" style={{ columnWidth: '340px', columnGap: '16px' }}>
+        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 4xl:columns-9 pb-4" style={{ columnWidth: '340px', columnGap: '16px' }}>
           {filteredRepos.map((repo) => {
             if (!repo) return null;
             const repoWorkflows = workflows[repo.id] || [];
