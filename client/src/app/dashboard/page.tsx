@@ -30,14 +30,6 @@ function DashboardContent() {
   const [lastSelectedRepos, setLastSelectedRepos] = useState<number[]>([]);
   const [initialWorkflowsLoaded, setInitialWorkflowsLoaded] = useState(false);
 
-  // Open filter panel by default on wider screens
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (window.innerWidth >= 768) {
-        setIsFilterOpen(true);
-      }
-    }
-  }, []);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -204,7 +196,7 @@ function DashboardContent() {
         {!isFilterOpen && !isFullscreen && (
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="fixed top-4 left-4 z-30 p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors md:hidden"
+            className="fixed top-4 left-4 z-30 p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors"
             title="Show filters"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,7 +235,7 @@ function DashboardContent() {
             />
             <button
               onClick={() => setIsFilterOpen(false)}
-              className="absolute top-4 -right-2 p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors md:hidden"
+              className="absolute top-4 -right-2 p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors"
               title="Hide filters"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
