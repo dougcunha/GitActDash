@@ -24,15 +24,15 @@ export default function StatusTotals({
       {/* Clickable Status Totals */}
       <div className="grid grid-cols-4 gap-2 text-center">
         <button
-          onClick={() => onFilterToggle('success')}
+          onClick={() => onFilterToggle('in_progress')}
           className={`p-2 rounded-lg transition-all duration-200 ${
-            activeFilter === 'success'
-              ? 'bg-green-200 dark:bg-green-900 ring-2 ring-green-400 dark:ring-green-600 shadow-md'
-              : 'bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50'
+            activeFilter === 'in_progress'
+              ? 'bg-yellow-200 dark:bg-yellow-900 ring-2 ring-yellow-400 dark:ring-yellow-600 shadow-md'
+              : 'bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50'
           }`}
         >
-          <div className="text-lg font-bold text-green-700 dark:text-green-400">{totals.success}</div>
-          <div className="text-xs text-green-600 dark:text-green-400">Success</div>
+          <div className="text-lg font-bold text-yellow-700 dark:text-yellow-400">{totals.in_progress}</div>
+          <div className="text-xs text-yellow-600 dark:text-yellow-400">Running</div>
         </button>
         <button
           onClick={() => onFilterToggle('failure')}
@@ -46,15 +46,15 @@ export default function StatusTotals({
           <div className="text-xs text-red-600 dark:text-red-400">Failed</div>
         </button>
         <button
-          onClick={() => onFilterToggle('in_progress')}
+          onClick={() => onFilterToggle('success')}
           className={`p-2 rounded-lg transition-all duration-200 ${
-            activeFilter === 'in_progress'
-              ? 'bg-yellow-200 dark:bg-yellow-900 ring-2 ring-yellow-400 dark:ring-yellow-600 shadow-md'
-              : 'bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50'
+            activeFilter === 'success'
+              ? 'bg-green-200 dark:bg-green-900 ring-2 ring-green-400 dark:ring-green-600 shadow-md'
+              : 'bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50'
           }`}
         >
-          <div className="text-lg font-bold text-yellow-700 dark:text-yellow-400">{totals.in_progress}</div>
-          <div className="text-xs text-yellow-600 dark:text-yellow-400">Running</div>
+          <div className="text-lg font-bold text-green-700 dark:text-green-400">{totals.success}</div>
+          <div className="text-xs text-green-600 dark:text-green-400">Success</div>
         </button>
         <button
           onClick={() => onFilterToggle('no_runs')}
