@@ -1,27 +1,27 @@
-# 🤖 Instructions for AI Agents (Codex)
+# 🤖 Instructions for AI Agents
 
-This document provides guidelines for interacting with the `GitActDash` project.
+## Commands
+- **Install**: `install.bat` (Windows) or `./install.sh` (Linux/macOS) - installs all dependencies
+- **Dev**: `npm run dev` (root) - starts both client and server concurrently
+- **Test**: `npm test` (root) - compiles and runs TypeScript tests
+- **Lint**: `npm run lint` (in client/) - ESLint check
+- **Build**: `npm run build` (in client/) - Next.js production build
+- **Single test**: Navigate to tests/ and run specific .js files after compilation
 
-## 🎯 Project Goal
+## Architecture
+- **Client**: Next.js/React with TypeScript, Tailwind CSS (port 3000)
+- **Server**: Express.js with TypeScript, Redis sessions (port 3001)  
+- **Database**: Redis for session management
+- **Tests**: TypeScript compiled to JS in tests/ directory
 
-GitActDash is a dashboard for monitoring the status of GitHub Actions across multiple repositories. It consists of a Next.js frontend and an Express.js backend.
-
-## 🏗️ Architecture
-
-- **`client/`**: Frontend application in Next.js/React.
-- **`server/`**: Backend API in Express.js.
-- **`package.json` (root)**: Orchestrates the scripts to run both environments.
-
-## 🗺️ Coding Guidelines
-
-1. **Code Structure**: Organize code into components and modules for better maintainability.
-2. **Type Safety**: Use TypeScript for type safety and to catch errors early.
-3. **API Integration**: Follow RESTful principles when designing API endpoints.
-4. **State Management**: Use React's built-in state management or context API for managing global state.
-5. **Styling**: Use Tailwind CSS for styling components consistently.
-6. **Testing**: Write unit tests for critical components and functions.
-7. **Documentation**: Document code with JSDoc comments in English and maintain a README for each module.
-8. **Code comments**: Use comments in English to explain complex logic or important decisions in the code.
+## Code Style
+- **TypeScript**: Strict mode enabled, use proper types
+- **Imports**: ES modules in client, CommonJS in server
+- **Styling**: Tailwind CSS classes, no custom CSS
+- **API**: RESTful endpoints, Express middleware pattern
+- **State**: React hooks/context, no external state library
+- **Naming**: camelCase variables, PascalCase components
+- **Error handling**: Try/catch blocks, proper HTTP status codes
 
 ## 🛠️ Common Tasks
 
