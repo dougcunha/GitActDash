@@ -27,8 +27,7 @@ function DashboardContent() {
   // Workflow states moved from ActionStatusDashboard
   const [workflows, setWorkflows] = useState<Record<number, WorkflowWithLatestRun[]>>({});
   const [workflowsLoading, setWorkflowsLoading] = useState(false);
-  const [lastSelectedRepos, setLastSelectedRepos] = useState<number[]>([]);
-  const [initialWorkflowsLoaded, setInitialWorkflowsLoaded] = useState(false);
+  const [loadedForRepos, setLoadedForRepos] = useState<string>(''); // Track which repos we've loaded for
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -85,9 +84,6 @@ function DashboardContent() {
       ? selectedRepos.filter((id) => id !== repoId)
       : [...selectedRepos, repoId];
     setSelectedRepos(newSelectedRepos);
-    
-    // Reset the initial loaded flag when repos change
-    setInitialWorkflowsLoaded(false);
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('selected_repos', JSON.stringify(newSelectedRepos));
@@ -108,16 +104,62 @@ function DashboardContent() {
     }
   };
 
-  // Function to load workflows for selected repositories
-  const loadWorkflows = useCallback(async (repoIds: number[]) => {
-    if (!authStatus?.authenticated || repoIds.length === 0) return;
+  // Load workflows when selectedRepos changes
+  useEffect(() => {
+    const currentReposKey = selectedRepos.sort().join(',');
+    
+    if (repos.length > 0 && selectedRepos.length > 0 && authStatus?.authenticated && currentReposKey !== loadedForRepos) {
+      // Inline the workflow loading to avoid dependency issues
+      const loadWorkflows = async () => {
+        setWorkflowsLoading(true);
+        const newWorkflows: Record<number, WorkflowWithLatestRun[]> = {};
+
+        try {
+          await Promise.all(
+            selectedRepos.map(async (repoId) => {
+              try {
+                const repo = repos.find(r => r.id === repoId);
+                if (!repo) {
+                  newWorkflows[repoId] = [];
+                  return;
+                }
+
+                const data = await apiRequest(`/api/repos/${repo.full_name}/workflows`);
+                newWorkflows[repoId] = Array.isArray(data.workflows) ? data.workflows : [];
+              } catch (error) {
+                console.error(`Error fetching workflows for repo ${repoId}:`, error);
+                newWorkflows[repoId] = [];
+              }
+            })
+          );
+
+          setWorkflows(newWorkflows);
+          setLoadedForRepos(currentReposKey);
+        } catch (error) {
+          console.error('Error loading workflows:', error);
+        } finally {
+          setWorkflowsLoading(false);
+        }
+      };
+
+      loadWorkflows();
+    } else if (selectedRepos.length === 0 && workflows && Object.keys(workflows).length > 0) {
+      setWorkflows({});
+      setLoadedForRepos('');
+    }
+  }, [selectedRepos, repos, authStatus?.authenticated, loadedForRepos, workflows]); // Include all dependencies
+
+
+
+  const onRefreshWorkflows = useCallback(async () => {
+    if (!authStatus?.authenticated || selectedRepos.length === 0) return;
 
     setWorkflowsLoading(true);
     const newWorkflows: Record<number, WorkflowWithLatestRun[]> = {};
 
     try {
       await Promise.all(
-        repoIds.map(async (repoId) => {
+        selectedRepos.map(async (repoId) => {
           try {
             const repo = repos.find(r => r.id === repoId);
             if (!repo) {
@@ -135,39 +177,14 @@ function DashboardContent() {
       );
 
       setWorkflows(newWorkflows);
-      setLastSelectedRepos([...repoIds]);
+      // Update the loaded key to prevent immediate reload
+      setLoadedForRepos(selectedRepos.sort().join(','));
     } catch (error) {
       console.error('Error loading workflows:', error);
     } finally {
       setWorkflowsLoading(false);
     }
-  }, [authStatus, repos]);
-
-  // Check if selectedRepos changed and load workflows if needed
-  useEffect(() => {
-    const reposChanged = JSON.stringify(selectedRepos.sort()) !== JSON.stringify(lastSelectedRepos.sort());
-
-    if (reposChanged && selectedRepos.length > 0 && authStatus?.authenticated) {
-      loadWorkflows(selectedRepos);
-    } else if (selectedRepos.length === 0) {
-      setWorkflows({});
-      setLastSelectedRepos([]);
-    }
-  }, [selectedRepos, authStatus, lastSelectedRepos, loadWorkflows]);
-
-  // Initial load of workflows when repos are loaded and selectedRepos is available
-  useEffect(() => {
-    if (!loading && repos.length > 0 && selectedRepos.length > 0 && authStatus?.authenticated && !initialWorkflowsLoaded) {
-      loadWorkflows(selectedRepos);
-      setInitialWorkflowsLoaded(true);
-    }
-  }, [loading, repos, selectedRepos, authStatus, initialWorkflowsLoaded, loadWorkflows]);
-
-
-
-  const onRefreshWorkflows = useCallback(async () => {
-    await loadWorkflows(selectedRepos);
-  }, [loadWorkflows, selectedRepos]);
+  }, [selectedRepos, authStatus?.authenticated, repos]);
 
   if (authLoading) {
     return (

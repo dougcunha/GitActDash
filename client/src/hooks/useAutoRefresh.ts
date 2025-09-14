@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface Options {
   interval?: number;
@@ -12,8 +12,6 @@ export default function useAutoRefresh(
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(interval);
   const [countdown, setCountdown] = useState(0);
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -24,33 +22,6 @@ export default function useAutoRefresh(
       setIsRefreshing(false);
     }
   }, [refreshCallback]);
-
-  const start = useCallback(() => {
-    if (refreshIntervalRef.current || !enabled) return;
-    setCountdown(refreshInterval);
-    refreshIntervalRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          // Schedule refresh for next tick to avoid setState during render
-          setTimeout(() => refresh(), 0);
-          return refreshInterval;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [enabled, refreshInterval, refresh]);
-
-  const stop = useCallback(() => {
-    if (refreshIntervalRef.current) {
-      clearInterval(refreshIntervalRef.current);
-      refreshIntervalRef.current = null;
-    }
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    setCountdown(0);
-  }, []);
 
   const toggleAutoRefresh = useCallback(() => {
     const newValue = !autoRefresh;
@@ -65,17 +36,30 @@ export default function useAutoRefresh(
   }, [refresh, autoRefresh, refreshInterval]);
 
   useEffect(() => {
-    return () => stop();
-  }, [stop]);
-
-  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    
     if (autoRefresh && enabled) {
-      start();
+      setCountdown(refreshInterval);
+      intervalId = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            // Schedule refresh for next tick to avoid setState during render
+            setTimeout(() => refresh(), 0);
+            return refreshInterval;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } else {
-      stop();
+      setCountdown(0);
     }
-    return () => stop();
-  }, [autoRefresh, refreshInterval, enabled, start, stop]);
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [autoRefresh, refreshInterval, enabled, refresh]);
 
   return {
     autoRefresh,

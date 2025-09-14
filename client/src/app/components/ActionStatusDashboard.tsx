@@ -4,6 +4,8 @@ import { useState, useCallback } from 'react';
 import RefreshControls from './RefreshControls';
 import RepositoryColumn from './RepositoryColumn';
 import SortControls from './SortControls';
+import ViewToggle from './ViewToggle';
+import WorkflowListView from './WorkflowListView';
 import useAutoRefresh from '@/hooks/useAutoRefresh';
 import type { Repo, WorkflowWithLatestRun } from '@/types/github';
 
@@ -29,6 +31,7 @@ export default function ActionStatusDashboard({
   const [activeFilters, setActiveFilters] = useState<Record<number, string | null>>({});
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [failedWorkflowFilter, setFailedWorkflowFilter] = useState(false);
+  const [currentView, setCurrentView] = useState<'grid' | 'list'>('grid');
 
   const hasFailedWorkflows = useCallback((repoId: number) => {
     const repoWorkflows = workflows[repoId];
@@ -182,27 +185,47 @@ export default function ActionStatusDashboard({
             </svg>
             <span className="sr-only">Exit Fullscreen</span>
           </button>
-          <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 4xl:columns-9 pb-4 mt-12" style={{ columnWidth: '340px', columnGap: '16px' }}>
-            {filteredRepos.map((repo) => {
-              if (!repo) return null;
-              const repoWorkflows = workflows[repo.id] || [];
-              const filteredWorkflows = getFilteredWorkflows(repo.id, repoWorkflows);
-              const activeFilter = activeFilters[repo.id];
-              return (
-                <div key={repo.id} className="break-inside-avoid mb-4">
-                  <RepositoryColumn
-                    repo={repo}
-                    workflows={repoWorkflows}
-                    filteredWorkflows={filteredWorkflows}
-                    activeFilter={activeFilter}
-                    onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
-                    getStatusTotals={getStatusTotals}
-                    isLoading={workflowsLoading}
-                  />
-                </div>
-              );
-            })}
+          
+          {/* View Toggle for fullscreen */}
+          <div className="absolute top-4 left-4 z-10">
+            <ViewToggle 
+              currentView={currentView}
+              onViewChange={setCurrentView}
+            />
           </div>
+          
+          {currentView === 'list' ? (
+            <div className="mt-16">
+              <WorkflowListView
+                selectedRepos={selectedRepos}
+                repos={repos}
+                workflows={workflows}
+                workflowsLoading={workflowsLoading}
+              />
+            </div>
+          ) : (
+            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 4xl:columns-9 pb-4 mt-12" style={{ columnWidth: '340px', columnGap: '16px' }}>
+              {filteredRepos.map((repo) => {
+                if (!repo) return null;
+                const repoWorkflows = workflows[repo.id] || [];
+                const filteredWorkflows = getFilteredWorkflows(repo.id, repoWorkflows);
+                const activeFilter = activeFilters[repo.id];
+                return (
+                  <div key={repo.id} className="break-inside-avoid mb-4">
+                    <RepositoryColumn
+                      repo={repo}
+                      workflows={repoWorkflows}
+                      filteredWorkflows={filteredWorkflows}
+                      activeFilter={activeFilter}
+                      onFilterToggle={(filterType) => toggleFilter(repo.id, filterType)}
+                      getStatusTotals={getStatusTotals}
+                      isLoading={workflowsLoading}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -220,67 +243,77 @@ export default function ActionStatusDashboard({
           )}
         </div>
         <div className="flex flex-wrap items-center gap-4 mt-4">
-          {/* Search Filter */}
-          <div className="relative flex-1 min-w-[280px] max-w-lg">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="Search repositories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 dark:focus:placeholder-gray-300 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-600"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                <svg className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          {/* Search Filter - only show for grid view */}
+          {currentView === 'grid' && (
+            <div className="relative flex-1 min-w-[280px] max-w-lg">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-              </button>
-            )}
-          </div>
-          {/* Sort Controls */}
-          <SortControls
-            sortOrder={sortOrder}
-            onSortOrderChange={setSortOrder}
-            showSortBySelector={false}
-            label="Sort repositories:"
-            size="md"
+              </div>
+              <input
+                type="text"
+                placeholder="Search repositories..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 dark:focus:placeholder-gray-300 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-600"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  <svg className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+          {/* View Toggle */}
+          <ViewToggle 
+            currentView={currentView}
+            onViewChange={setCurrentView}
           />
-          {/* Type Filter Controls */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <button
-              onClick={() => setRepoFilter('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'all' ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-            >
-              All ({selectedReposDetails.length})
-            </button>
-            <button
-              onClick={() => setRepoFilter('personal')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'personal' ? 'bg-green-600 dark:bg-green-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-            >
-              Personal ({personalReposCount})
-            </button>
-            <button
-              onClick={() => setRepoFilter('organization')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'organization' ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-            >
-              Organizations ({organizationReposCount})
-            </button>
-            <button
-              onClick={() => setFailedWorkflowFilter(!failedWorkflowFilter)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${failedWorkflowFilter ? 'bg-red-600 dark:bg-red-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-            >
-              With failures ({failedWorkflowReposCount})
-            </button>
-
-          </div>
+          {/* Sort Controls - only show for grid view */}
+          {currentView === 'grid' && (
+            <SortControls
+              sortOrder={sortOrder}
+              onSortOrderChange={setSortOrder}
+              showSortBySelector={false}
+              label="Sort repositories:"
+              size="md"
+            />
+          )}
+          {/* Type Filter Controls - only show for grid view */}
+          {currentView === 'grid' && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <button
+                onClick={() => setRepoFilter('all')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'all' ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+              >
+                All ({selectedReposDetails.length})
+              </button>
+              <button
+                onClick={() => setRepoFilter('personal')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'personal' ? 'bg-green-600 dark:bg-green-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+              >
+                Personal ({personalReposCount})
+              </button>
+              <button
+                onClick={() => setRepoFilter('organization')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${repoFilter === 'organization' ? 'bg-blue-600 dark:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+              >
+                Organizations ({organizationReposCount})
+              </button>
+              <button
+                onClick={() => setFailedWorkflowFilter(!failedWorkflowFilter)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${failedWorkflowFilter ? 'bg-red-600 dark:bg-red-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+              >
+                With failures ({failedWorkflowReposCount})
+              </button>
+            </div>
+          )}
           {/* Refresh Controls */}
           <RefreshControls
             isRefreshing={isRefreshing}
@@ -308,6 +341,13 @@ export default function ActionStatusDashboard({
         <div className="text-center py-12 text-gray-600 dark:text-gray-400">
           <p>Select repositories to view their action status</p>
         </div>
+      ) : currentView === 'list' ? (
+        <WorkflowListView
+          selectedRepos={selectedRepos}
+          repos={repos}
+          workflows={workflows}
+          workflowsLoading={workflowsLoading}
+        />
       ) : (
         <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 3xl:columns-8 4xl:columns-9 pb-4" style={{ columnWidth: '340px', columnGap: '16px' }}>
           {filteredRepos.map((repo) => {
